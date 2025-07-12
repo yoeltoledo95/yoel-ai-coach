@@ -267,79 +267,7 @@ def get_yesterday_defaults(logs):
         "notes": yesterday.get("notes", "")
     }
 
-def quick_log(logs, preset):
-    """Create a quick log entry based on preset"""
-    today = datetime.now().strftime("%Y-%m-%d")
-    
-    if preset == "Great Day":
-        entry = {
-            "date": today,
-            "timestamp": datetime.now().isoformat(),
-            "mood": "8",
-            "energy": "8",
-            "sleep_hours": "7.5",
-            "sleep_quality": "8",
-            "stress_level": "3",
-            "soreness": "none",
-            "training_done": "Push Day - Moderate",
-            "training_quality": "8",
-            "nutrition": "eggs, chicken, vegetables, tahini",
-            "hydration": "8",
-            "notes": "Feeling great today!",
-            "recovery_score": "8.0",
-            "training_volume": "medium",
-            "split": "Push"
-        }
-    elif preset == "Recovery Day":
-        entry = {
-            "date": today,
-            "timestamp": datetime.now().isoformat(),
-            "mood": "6",
-            "energy": "5",
-            "sleep_hours": "6.5",
-            "sleep_quality": "6",
-            "stress_level": "5",
-            "soreness": "shoulders, chest",
-            "training_done": "Mobility/Recovery",
-            "training_quality": "6",
-            "nutrition": "eggs, toast, fruit",
-            "hydration": "7",
-            "notes": "Recovery day needed",
-            "recovery_score": "5.5",
-            "training_volume": "low",
-            "split": "Recovery"
-        }
-    else:  # Rest Day
-        entry = {
-            "date": today,
-            "timestamp": datetime.now().isoformat(),
-            "mood": "7",
-            "energy": "6",
-            "sleep_hours": "8.0",
-            "sleep_quality": "7",
-            "stress_level": "4",
-            "soreness": "none",
-            "training_done": "None/Rest Day",
-            "training_quality": "5",
-            "nutrition": "light meals, lots of water",
-            "hydration": "8",
-            "notes": "Rest day",
-            "recovery_score": "7.0",
-            "training_volume": "none",
-            "split": "Rest"
-        }
-    
-    # Calculate metrics
-    entry["recovery_score"] = str(calculate_recovery_score(entry))
-    entry["training_volume"] = estimate_training_volume(entry["training_done"])
-    entry["split"] = detect_split(entry["training_done"])
-    
-    # Remove existing entry for today if it exists
-    logs = [log for log in logs if log.get("date") != today]
-    logs.append(entry)
-    save_logs(logs)
-    
-    return entry
+
 
 # Enhanced AI response function (now uses the true AI agent)
 def get_enhanced_response(user_input, profile, logs):
@@ -368,13 +296,13 @@ def main():
     
     # Sidebar for navigation
     with st.sidebar:
-        st.header("📱 Quick Actions")
-        page = st.radio("Choose:", ["Quick Log", "Full Log", "View Trends", "AI Chat", "Pattern Analysis", "Settings"])
+        st.header("📱 Navigation")
+        page = st.radio("Choose:", ["Daily Log", "Log Meals", "View Trends", "AI Chat", "Pattern Analysis", "Settings"])
     
-    if page == "Quick Log":
-        quick_log_page(logs, logged_today)
-    elif page == "Full Log":
+    if page == "Daily Log":
         log_today_page(logs, logged_today)
+    elif page == "Log Meals":
+        log_meals_page(logs)
     elif page == "View Trends":
         view_trends_page(logs)
     elif page == "AI Chat":
@@ -386,6 +314,7 @@ def main():
 
 def log_today_page(logs, logged_today):
     st.header("📊 Daily Log")
+    st.markdown("Welcome to your daily tracking! Log your mood, training, and nutrition for today.")
     
     if logged_today:
         st.warning("⚠️ You've already logged today! You can update your entry below.")
@@ -842,36 +771,102 @@ def pattern_analysis_page(logs):
         if energies and statistics.mean(energies) < 6:
             st.warning("⚠️ Your energy levels are low. Consider lighter training or more rest.")
 
-def quick_log_page(logs, logged_today):
-    st.header("⚡ Quick Log")
+def log_meals_page(logs):
+    st.header("🍽️ Log Your Meals")
     
-    if logged_today:
-        st.warning("⚠️ You've already logged today! You can update your entry below.")
+    # Check if we have a log for today
+    today = datetime.now().strftime("%Y-%m-%d")
+    today_log = next((log for log in logs if log.get("date") == today), None)
     
-    st.subheader("Choose a preset:")
+    if not today_log:
+        st.warning("⚠️ No daily log found for today. Please complete your daily log first!")
+        st.info("💡 Go to 'Daily Log' to log your training, mood, and other activities for today.")
+        return
     
+    st.success(f"✅ Found your daily log for {today}")
+    
+    # Get current nutrition and notes
+    current_nutrition = today_log.get("nutrition", "")
+    current_notes = today_log.get("notes", "")
+    
+    # Display current status
+    st.subheader("📊 Current Status")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.metric("🍽️ Meals Logged", "Yes" if current_nutrition.strip() else "No")
+    with col2:
+        st.metric("📝 Notes Added", "Yes" if current_notes.strip() else "No")
+    
+    # Quick meal suggestions
+    st.subheader("🍽️ Quick Meal Suggestions")
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("😊 Great Day", type="primary"):
-            entry = quick_log(logs, "Great Day")
-            st.success(f"✅ Quick log saved: {entry['training_done']}")
-            st.info(f"📈 Recovery Score: {entry['recovery_score']}/10")
+        if st.button("🥚 Breakfast"):
+            suggested_meal = "Eggs with tahini, vegetables, and toast"
+            st.session_state.suggested_meal = suggested_meal
     
     with col2:
-        if st.button("🔄 Recovery Day"):
-            entry = quick_log(logs, "Recovery Day")
-            st.success(f"✅ Quick log saved: {entry['training_done']}")
-            st.info(f"📈 Recovery Score: {entry['recovery_score']}/10")
+        if st.button("🍗 Lunch"):
+            suggested_meal = "Chicken with rice, vegetables, and fruit"
+            st.session_state.suggested_meal = suggested_meal
     
     with col3:
-        if st.button("😴 Rest Day"):
-            entry = quick_log(logs, "Rest Day")
-            st.success(f"✅ Quick log saved: {entry['training_done']}")
-            st.info(f"📈 Recovery Score: {entry['recovery_score']}/10")
+        if st.button("🥗 Dinner"):
+            suggested_meal = "Salad with protein, vegetables, and healthy fats"
+            st.session_state.suggested_meal = suggested_meal
     
-    st.markdown("---")
-    st.info("💡 Use Quick Log for fast logging, or go to 'Full Log' for detailed tracking!")
+    # Display suggested meal if available
+    if hasattr(st.session_state, 'suggested_meal'):
+        st.info(f"💡 Suggested: {st.session_state.suggested_meal}")
+    
+    # Update nutrition and notes
+    st.subheader("📝 Update Your Meals & Notes")
+    
+    # Pre-fill with current data
+    new_nutrition = st.text_area(
+        "🍽️ What did you eat today? (Add to existing meals)",
+        value=current_nutrition,
+        height=120,
+        placeholder="e.g., Breakfast: eggs with tahini and vegetables\nLunch: chicken with rice and salad\nDinner: fish with quinoa and vegetables"
+    )
+    
+    new_notes = st.text_area(
+        "📝 Additional notes about your meals or day",
+        value=current_notes,
+        height=100,
+        placeholder="e.g., Felt great after lunch, energy was high for training"
+    )
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("💾 Save Updates", type="primary"):
+            # Update the existing log entry
+            today_log["nutrition"] = new_nutrition
+            today_log["notes"] = new_notes
+            
+            # Save to file
+            save_logs(logs)
+            st.success("✅ Meals and notes updated successfully!")
+            st.rerun()
+    
+    with col2:
+        if st.button("🔄 Reset to Original"):
+            st.rerun()
+    
+    # Show recent meal history
+    if len(logs) > 1:
+        st.subheader("📅 Recent Meal History")
+        recent_logs = logs[-5:]  # Last 5 days
+        
+        for log in recent_logs:
+            if log.get("nutrition") and log.get("nutrition").strip():
+                st.write(f"**{log['date']}:** {log['nutrition'][:100]}{'...' if len(log['nutrition']) > 100 else ''}")
+                if log.get("notes"):
+                    st.write(f"*Notes: {log['notes'][:50]}{'...' if len(log['notes']) > 50 else ''}*")
+                st.markdown("---")
 
 def settings_page():
     st.header("⚙️ Settings")
