@@ -5,7 +5,7 @@ import openai
 from typing import List, Dict, Any
 
 class AICoach:
-    def __init__(self, profile_path="yoel_profile.json", logs_path="log_entry.json"):
+    def __init__(self, profile_path="yoel_profile.json", logs_path="daily_logs.json"):
         self.profile_path = profile_path
         self.logs_path = logs_path
         self.profile = self.load_profile()
