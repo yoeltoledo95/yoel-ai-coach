@@ -369,7 +369,7 @@ def main():
     # Sidebar for navigation
     with st.sidebar:
         st.header("📱 Quick Actions")
-        page = st.radio("Choose:", ["Quick Log", "Full Log", "View Trends", "AI Chat", "Settings"])
+        page = st.radio("Choose:", ["Quick Log", "Full Log", "View Trends", "AI Chat", "Pattern Analysis", "Settings"])
     
     if page == "Quick Log":
         quick_log_page(logs, logged_today)
@@ -379,6 +379,8 @@ def main():
         view_trends_page(logs)
     elif page == "AI Chat":
         ai_chat_page(profile, logs)
+    elif page == "Pattern Analysis":
+        pattern_analysis_page(logs)
     elif page == "Settings":
         settings_page()
 
@@ -647,13 +649,198 @@ def ai_chat_page(profile, logs):
         st.error("Profile not found. Please check yoel_profile.json")
         return
     
-    # Simple chat interface
-    user_input = st.text_input("Ask your AI coach:", placeholder="What should I train today?")
+    # Show AI status
+    if ai_coach.client:
+        st.success("✅ Connected to GPT - Full AI intelligence available!")
+    else:
+        st.info("ℹ️ Using smart fallback responses. Add OPENAI_API_KEY for full AI features.")
+    
+    # Pattern Analysis Section
+    st.subheader("📊 Your Recent Patterns")
+    if logs:
+        pattern_analysis = ai_coach.analyze_patterns()
+        st.text(pattern_analysis)
+        
+        # Show recent logs summary
+        if len(logs) >= 3:
+            recent_logs = logs[-3:]
+            st.subheader("📝 Recent Activity")
+            for log in recent_logs:
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Date", log.get("date", "Unknown"))
+                with col2:
+                    st.metric("Energy", f"{log.get('energy', 'N/A')}/10")
+                with col3:
+                    st.metric("Training", log.get("training_done", "None").split(" - ")[0] if " - " in log.get("training_done", "") else log.get("training_done", "None"))
+    else:
+        st.warning("No training history available yet. Start logging to see patterns!")
+    
+    st.markdown("---")
+    
+    # Enhanced Chat Interface
+    st.subheader("💬 Chat with Your AI Coach")
+    
+    # Chat history (simple implementation)
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+    
+    # Display chat history
+    for message in st.session_state.chat_history:
+        if message["role"] == "user":
+            st.write(f"**You:** {message['content']}")
+        else:
+            st.write(f"**AI Coach:** {message['content']}")
+    
+    # Input and response
+    user_input = st.text_input("Ask your AI coach:", placeholder="What should I train today? I'm tired... What should I eat?")
     
     if user_input:
-        # Simple response logic (you can enhance this)
-        response = get_enhanced_response(user_input, profile, logs)
+        # Get AI response
+        response = ai_coach.get_ai_response(user_input)
+        
+        # Add to chat history
+        st.session_state.chat_history.append({"role": "user", "content": user_input})
+        st.session_state.chat_history.append({"role": "assistant", "content": response})
+        
+        # Display response
         st.write(f"**AI Coach:** {response}")
+        
+        # Clear input (refresh to show new message)
+        st.rerun()
+    
+    # Quick action buttons
+    st.markdown("---")
+    st.subheader("🚀 Quick Actions")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("💪 Training Advice"):
+            response = ai_coach.get_ai_response("What should I train today?")
+            st.session_state.chat_history.append({"role": "user", "content": "What should I train today?"})
+            st.session_state.chat_history.append({"role": "assistant", "content": response})
+            st.write(f"**AI Coach:** {response}")
+    
+    with col2:
+        if st.button("🍽️ Nutrition Tips"):
+            response = ai_coach.get_ai_response("What should I eat today?")
+            st.session_state.chat_history.append({"role": "user", "content": "What should I eat today?"})
+            st.session_state.chat_history.append({"role": "assistant", "content": response})
+            st.write(f"**AI Coach:** {response}")
+    
+    with col3:
+        if st.button("📊 Pattern Analysis"):
+            pattern_analysis = ai_coach.analyze_patterns()
+            st.session_state.chat_history.append({"role": "user", "content": "Show me my patterns"})
+            st.session_state.chat_history.append({"role": "assistant", "content": pattern_analysis})
+            st.write(f"**AI Coach:** {pattern_analysis}")
+    
+    # Clear chat button
+    if st.button("🗑️ Clear Chat History"):
+        st.session_state.chat_history = []
+        st.rerun()
+
+def pattern_analysis_page(logs):
+    st.header("📊 Advanced Pattern Analysis")
+    
+    if not logs:
+        st.warning("No data to analyze yet. Start logging to see patterns!")
+        return
+    
+    # AI Coach pattern analysis
+    pattern_analysis = ai_coach.analyze_patterns()
+    st.subheader("🤖 AI Analysis")
+    st.text(pattern_analysis)
+    
+    # Detailed metrics
+    st.subheader("📈 Detailed Metrics")
+    recent_logs = logs[-7:] if len(logs) >= 7 else logs
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        # Energy analysis
+        energies = [float(log.get("energy", 5)) for log in recent_logs if log.get("energy")]
+        if energies:
+            avg_energy = statistics.mean(energies)
+            energy_trend = "📈" if energies[-1] > energies[0] else "📉" if energies[-1] < energies[0] else "➡️"
+            st.metric("⚡ Energy Trend", f"{energy_trend} {avg_energy:.1f}/10")
+    
+    with col2:
+        # Recovery analysis
+        recovery_scores = [float(log.get("recovery_score", 5)) for log in recent_logs if log.get("recovery_score")]
+        if recovery_scores:
+            avg_recovery = statistics.mean(recovery_scores)
+            st.metric("🔄 Recovery", f"{avg_recovery:.1f}/10")
+    
+    with col3:
+        # Training frequency
+        training_days = sum(1 for log in recent_logs if log.get("training_done") and log.get("training_done").lower() != "none")
+        st.metric("🏋️ Training Days", f"{training_days}/{len(recent_logs)}")
+    
+    # Soreness analysis
+    st.subheader("💪 Soreness Patterns")
+    all_soreness = []
+    for log in recent_logs:
+        if log.get("soreness") and log.get("soreness") != "none":
+            all_soreness.extend([s.strip() for s in log.get("soreness", "").split(",")])
+    
+    if all_soreness:
+        soreness_counts = {}
+        for soreness in all_soreness:
+            soreness_counts[soreness] = soreness_counts.get(soreness, 0) + 1
+        
+        st.write("Most common soreness areas:")
+        for area, count in sorted(soreness_counts.items(), key=lambda x: x[1], reverse=True):
+            st.write(f"• {area}: {count} times")
+    else:
+        st.info("No soreness recorded recently. Great recovery!")
+    
+    # Training split analysis
+    st.subheader("🏋️ Training Split Analysis")
+    split_counts = {"Push": 0, "Pull": 0, "Legs": 0, "Recovery": 0, "Other": 0}
+    for log in recent_logs:
+        split = log.get("split") or detect_split(log.get("training_done", ""))
+        if split in split_counts:
+            split_counts[split] += 1
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Push Days", split_counts["Push"])
+    with col2:
+        st.metric("Pull Days", split_counts["Pull"])
+    with col3:
+        st.metric("Legs Days", split_counts["Legs"])
+    
+    # AI Insights
+    st.subheader("🤖 AI Insights")
+    if ai_coach.client:
+        st.success("✅ Full AI analysis available with GPT")
+        insight_prompt = f"Based on this training data: {json.dumps(recent_logs, indent=2)}, provide 3 specific insights about Yoel's training patterns and suggestions for improvement."
+        try:
+            insight_response = ai_coach.client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are Yoel's AI coach. Provide specific, actionable insights."},
+                    {"role": "user", "content": insight_prompt}
+                ],
+                max_tokens=200,
+                temperature=0.7
+            )
+            st.write(insight_response.choices[0].message.content)
+        except:
+            st.info("AI insights temporarily unavailable. Using pattern analysis instead.")
+    else:
+        st.info("Add OPENAI_API_KEY for AI-powered insights!")
+        
+        # Manual insights
+        if recovery_scores and statistics.mean(recovery_scores) < 6:
+            st.warning("⚠️ Your recovery scores are low. Consider more rest days.")
+        if training_days >= 5:
+            st.info("🏋️ You're training frequently. Make sure to include recovery days!")
+        if energies and statistics.mean(energies) < 6:
+            st.warning("⚠️ Your energy levels are low. Consider lighter training or more rest.")
 
 def quick_log_page(logs, logged_today):
     st.header("⚡ Quick Log")
