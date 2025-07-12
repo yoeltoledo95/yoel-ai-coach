@@ -1,0 +1,60 @@
+{
+  "name": "Yoel Toledo",
+  "age": 30,
+  "height_cm": 170,
+  "weight_kg": 70,
+  "body_fat_percent": 13,
+  "goals": [
+    "build muscle",
+    "be athletic",
+    "fix muscular imbalances",
+    "boost energy",
+    "improve mobility",
+    "achieve push to handstand",
+    "achieve pancake"
+  ],
+  "injuries": {
+    "shoulder": "rotator cuff recovered, ongoing trapezius/top pain during pressing and shoulder protraction",
+    "knee": "left meniscus tear – no limitations, deep flexion and high impact are okay with gradual progression"
+  },
+  "training_preferences": {
+    "style": [
+      "calisthenics",
+      "yoga",
+      "band work",
+      "kneesovertoesguy",
+      "athletic workout"
+    ],
+    "split": "Push/Pull/Legs",
+    "days_per_week": [4, 5, 6],
+    "session_length_minutes": 60,
+    "gym_equipment": {
+      "available": [
+        "pull-up bar",
+        "dip bar",
+        "adjustable dumbbells",
+        "bands",
+        "cables",
+        "bench",
+        "leg press"
+      ],
+      "avoid": ["barbell bench press"]
+    }
+  },
+  "diet": {
+    "style": "minimal processed foods",
+    "intermittent_fasting": true,
+    "preferred_meal_times": "varies – usually 12:00 and 18:00",
+    "food_likes": "learn over time",
+    "food_dislikes": [
+      "processed sugar",
+      "fried junk food"
+    ]
+  },
+  "lifestyle": {
+    "location": "Israel",
+    "job_type": "active/physical",
+    "other_activities": ["yoga"],
+    "sleep_hours": "varies – learn over time"
+  }
+}
