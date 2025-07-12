@@ -1,129 +1,275 @@
 import streamlit as st
 import json
-from datetime import datetime, timedelta
-import os
-from collections import defaultdict
-import statistics
-import plotly.express as px
-import plotly.graph_objects as go
 import pandas as pd
+import plotly.express as px
+import statistics
+from datetime import datetime
+import os
+import openai
+from typing import List, Dict, Any
 
-# Page config for mobile
-st.set_page_config(
-    page_title="Yoel's AI Coach",
-    page_icon="💪",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
-
-# Load your profile
+# Load data functions
 def load_profile(path="yoel_profile.json"):
     try:
         with open(path, "r") as f:
             return json.load(f)
     except FileNotFoundError:
-        return None
+        st.error(f"Profile file {path} not found!")
+        return {}
 
-# Load daily logs
 def load_logs(path="daily_logs.json"):
-    if os.path.exists(path):
+    try:
         with open(path, "r") as f:
-            try:
-                return json.load(f)
-            except json.JSONDecodeError:
-                return []
-    return []
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
 
-# Save logs
 def save_logs(logs, path="daily_logs.json"):
     with open(path, "w") as f:
         json.dump(logs, f, indent=2)
 
-# Detect training split from description
+# AI Coach class (integrated from ai_coach.py)
+class AICoach:
+    def __init__(self, profile_path="yoel_profile.json", logs_path="daily_logs.json"):
+        self.profile_path = profile_path
+        self.logs_path = logs_path
+        self.profile = self.load_profile()
+        self.logs = self.load_logs()
+        
+        # Set up OpenAI (you'll need to add your API key)
+        self.client = None
+        if os.getenv("OPENAI_API_KEY"):
+            openai.api_key = os.getenv("OPENAI_API_KEY")
+            self.client = openai.OpenAI()
+    
+    def load_profile(self) -> Dict[str, Any]:
+        """Load user profile from JSON file"""
+        try:
+            with open(self.profile_path, "r") as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return {}
+    
+    def load_logs(self) -> List[Dict[str, Any]]:
+        """Load daily logs from JSON file"""
+        try:
+            with open(self.logs_path, "r") as f:
+                return json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []
+    
+    def analyze_patterns(self) -> str:
+        """Analyze patterns in user's logs for AI context"""
+        if not self.logs:
+            return "No training history available yet."
+        
+        # Analyze recent patterns
+        recent_logs = self.logs[-7:]  # Last 7 days
+        
+        energy_trend = []
+        training_frequency = 0
+        common_soreness = []
+        
+        for log in recent_logs:
+            if 'energy' in log and str(log['energy']).isdigit():
+                energy_trend.append(int(log['energy']))
+            if log.get('training_done') and log['training_done'].strip():
+                training_frequency += 1
+            if log.get('soreness') and log['soreness'] != 'none':
+                common_soreness.append(log['soreness'])
+        
+        analysis = f"Recent Analysis:\n"
+        if energy_trend:
+            avg_energy = sum(energy_trend) / len(energy_trend)
+            analysis += f"- Average energy: {avg_energy:.1f}/10\n"
+        analysis += f"- Training frequency: {training_frequency} days in last week\n"
+        
+        if common_soreness:
+            analysis += f"- Common soreness: {', '.join(set(common_soreness))}\n"
+        
+        return analysis
+    
+    def get_ai_response(self, user_input: str) -> str:
+        """Get intelligent response from GPT based on profile and logs"""
+        if not self.client:
+            return self.get_fallback_response(user_input)
+        
+        # Build context for AI
+        context = f"""
+You are Yoel's personal AI fitness coach. You know him deeply and adapt to his needs.
+
+PROFILE:
+{json.dumps(self.profile, indent=2)}
+
+RECENT PATTERNS:
+{self.analyze_patterns()}
+
+RECENT LOGS (last 3 days):
+{json.dumps(self.logs[-3:], indent=2)}
+
+INSTRUCTIONS:
+- Be encouraging and motivating like a real coach
+- Consider his injuries (shoulder issues, knee is fine now)
+- Suggest training based on his goals (calisthenics, yoga, athletic)
+- Recommend food based on his preferences and training
+- Analyze patterns in his logs to give personalized advice
+- Keep responses conversational and helpful
+
+User says: {user_input}
+
+Respond as Yoel's AI coach:
+"""
+        
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are Yoel's personal AI fitness coach. Be encouraging, knowledgeable, and personalized."},
+                    {"role": "user", "content": context}
+                ],
+                max_tokens=300,
+                temperature=0.7
+            )
+            return response.choices[0].message.content or "I'm here to help with your training and nutrition!"
+        except Exception as e:
+            return self.get_fallback_response(user_input)
+    
+    def get_fallback_response(self, user_input: str) -> str:
+        """Fallback responses when AI is not available"""
+        user_input = user_input.lower()
+        
+        if "tired" in user_input or "low energy" in user_input:
+            return "I see you're feeling tired. Based on your goals, let's do some light mobility work and maybe some gentle yoga. No heavy training today - recovery is just as important as training! 💪"
+        
+        if "what should i train" in user_input or "workout" in user_input:
+            return f"Looking at your {self.profile.get('training_preferences', {}).get('split', 'Push/Pull/Legs')} split, what day are you on? I can suggest specific exercises that work with your calisthenics and yoga preferences while being mindful of your shoulder."
+        
+        if "what should i eat" in user_input or "food" in user_input:
+            return "For your goals and preferences, I'd suggest something with good protein and clean carbs. How about eggs with tahini and some vegetables? Or if you're post-workout, maybe some chicken with rice and fruit?"
+        
+        if "injury" in user_input or "pain" in user_input:
+            return "I'm keeping an eye on your shoulder issues. Remember to do your band work and avoid exercises that cause pain. Your knee is doing well though - we can include more knee work gradually!"
+        
+        return "I'm here to help with your training, nutrition, and recovery! Try asking about what to train today, food suggestions, or how you're feeling. I'm learning from your daily logs to give you better advice over time."
+
+# Initialize AI Coach
+ai_coach = AICoach()
+
+# Helper functions
 def detect_split(training_done):
-    t = training_done.lower()
-    if "push" in t:
+    if not training_done or training_done.lower() == "none/rest day":
+        return "Rest"
+    elif "push" in training_done.lower():
         return "Push"
-    elif "pull" in t:
+    elif "pull" in training_done.lower():
         return "Pull"
-    elif "leg" in t or "squat" in t or "deadlift" in t:
+    elif "legs" in training_done.lower():
         return "Legs"
-    elif "mobility" in t or "recovery" in t or "rest" in t:
+    elif "yoga" in training_done.lower():
+        return "Yoga"
+    elif "mobility" in training_done.lower() or "recovery" in training_done.lower():
         return "Recovery"
-    elif t.strip() in ["", "none", "no", "rest"]:
-        return "None"
     else:
         return "Other"
 
-# Calculate recovery score
 def calculate_recovery_score(entry):
-    try:
-        energy = float(entry.get("energy", 5))
-        sleep_hours = float(entry.get("sleep_hours", 7))
-        sleep_quality = float(entry.get("sleep_quality", 5))
-        stress = float(entry.get("stress_level", 5))
-        soreness = entry.get("soreness", "").lower()
-        
-        score = (energy + sleep_quality) / 2
-        
-        if sleep_hours >= 7.5:
-            score += 1
-        elif sleep_hours < 6:
-            score -= 1
-        
-        if stress > 7:
-            score -= 0.5
-        
-        if soreness != "none" and soreness:
-            score -= 0.5
-        
-        return max(1, min(10, round(score, 1)))
-    except:
-        return 5.0
+    """Calculate recovery score based on various factors"""
+    score = 5.0  # Base score
+    
+    # Energy level (0-10)
+    if 'energy' in entry:
+        try:
+            energy = float(entry['energy'])
+            score += (energy - 5) * 0.3
+        except:
+            pass
+    
+    # Sleep hours
+    if 'sleep_hours' in entry:
+        try:
+            sleep = float(entry['sleep_hours'])
+            if 7 <= sleep <= 9:
+                score += 1.0
+            elif 6 <= sleep < 7 or 9 < sleep <= 10:
+                score += 0.5
+            elif sleep < 6:
+                score -= 1.0
+        except:
+            pass
+    
+    # Sleep quality
+    if 'sleep_quality' in entry:
+        try:
+            quality = float(entry['sleep_quality'])
+            score += (quality - 5) * 0.2
+        except:
+            pass
+    
+    # Stress level (inverse)
+    if 'stress_level' in entry:
+        try:
+            stress = float(entry['stress_level'])
+            score -= (stress - 5) * 0.2
+        except:
+            pass
+    
+    # Training quality
+    if 'training_quality' in entry:
+        try:
+            training_quality = float(entry['training_quality'])
+            score += (training_quality - 5) * 0.1
+        except:
+            pass
+    
+    # Hydration
+    if 'hydration' in entry:
+        try:
+            hydration = float(entry['hydration'])
+            score += (hydration - 5) * 0.1
+        except:
+            pass
+    
+    return max(0, min(10, score))
 
-# Estimate training volume
 def estimate_training_volume(training_done):
-    training = training_done.lower()
-    if any(word in training for word in ["heavy", "max", "intense", "failure"]):
+    if not training_done or training_done.lower() == "none/rest day":
+        return "none"
+    elif "heavy" in training_done.lower():
         return "high"
-    elif any(word in training for word in ["light", "mobility", "recovery", "walk"]):
-        return "low"
-    elif any(word in training for word in ["moderate", "medium", "normal"]):
+    elif "moderate" in training_done.lower():
         return "medium"
+    elif "light" in training_done.lower() or "mobility" in training_done.lower() or "recovery" in training_done.lower():
+        return "low"
     else:
-        return "unknown"
+        return "medium"
 
-# Check if logged today
 def check_logged_today(logs):
     today = datetime.now().strftime("%Y-%m-%d")
     return any(log.get("date") == today for log in logs)
 
-# Get yesterday's values as defaults
 def get_yesterday_defaults(logs):
+    """Get yesterday's values as defaults"""
     if not logs:
         return {}
     
     yesterday = logs[-1]
     return {
-        "mood": yesterday.get("mood", ""),
-        "energy": yesterday.get("energy", ""),
-        "sleep_hours": yesterday.get("sleep_hours", ""),
-        "sleep_quality": yesterday.get("sleep_quality", ""),
-        "stress_level": yesterday.get("stress_level", ""),
-        "soreness": yesterday.get("soreness", ""),
+        "mood": yesterday.get("mood", "5"),
+        "energy": yesterday.get("energy", "5"),
+        "sleep_hours": yesterday.get("sleep_hours", "7.0"),
+        "sleep_quality": yesterday.get("sleep_quality", "5"),
+        "stress_level": yesterday.get("stress_level", "5"),
+        "soreness": yesterday.get("soreness", "none"),
+        "hydration": yesterday.get("hydration", "5"),
         "training_done": yesterday.get("training_done", ""),
-        "training_quality": yesterday.get("training_quality", ""),
+        "training_quality": yesterday.get("training_quality", "5"),
         "nutrition": yesterday.get("nutrition", ""),
-        "hydration": yesterday.get("hydration", ""),
         "notes": yesterday.get("notes", "")
     }
 
-# Quick log function
 def quick_log(logs, preset):
+    """Create a quick log entry based on preset"""
     today = datetime.now().strftime("%Y-%m-%d")
-    
-    # Remove existing entry for today
-    logs = [log for log in logs if log.get("date") != today]
     
     if preset == "Great Day":
         entry = {
@@ -131,13 +277,13 @@ def quick_log(logs, preset):
             "timestamp": datetime.now().isoformat(),
             "mood": "8",
             "energy": "8",
-            "sleep_hours": "8.0",
+            "sleep_hours": "7.5",
             "sleep_quality": "8",
             "stress_level": "3",
             "soreness": "none",
             "training_done": "Push Day - Moderate",
             "training_quality": "8",
-            "nutrition": "eggs, oatmeal, chicken, vegetables",
+            "nutrition": "eggs, chicken, vegetables, tahini",
             "hydration": "8",
             "notes": "Feeling great today!",
             "recovery_score": "8.0",
@@ -150,20 +296,20 @@ def quick_log(logs, preset):
             "timestamp": datetime.now().isoformat(),
             "mood": "6",
             "energy": "5",
-            "sleep_hours": "7.0",
+            "sleep_hours": "6.5",
             "sleep_quality": "6",
             "stress_level": "5",
             "soreness": "shoulders, chest",
             "training_done": "Mobility/Recovery",
             "training_quality": "6",
-            "nutrition": "light meals, lots of water",
+            "nutrition": "eggs, toast, fruit",
             "hydration": "7",
             "notes": "Recovery day needed",
             "recovery_score": "5.5",
             "training_volume": "low",
             "split": "Recovery"
         }
-    elif preset == "Rest Day":
+    else:  # Rest Day
         entry = {
             "date": today,
             "timestamp": datetime.now().isoformat(),
@@ -175,97 +321,38 @@ def quick_log(logs, preset):
             "soreness": "none",
             "training_done": "None/Rest Day",
             "training_quality": "5",
-            "nutrition": "normal meals",
-            "hydration": "7",
+            "nutrition": "light meals, lots of water",
+            "hydration": "8",
             "notes": "Rest day",
             "recovery_score": "7.0",
-            "training_volume": "low",
-            "split": "None"
+            "training_volume": "none",
+            "split": "Rest"
         }
     
+    # Calculate metrics
+    entry["recovery_score"] = str(calculate_recovery_score(entry))
+    entry["training_volume"] = estimate_training_volume(entry["training_done"])
+    entry["split"] = detect_split(entry["training_done"])
+    
+    # Remove existing entry for today if it exists
+    logs = [log for log in logs if log.get("date") != today]
     logs.append(entry)
     save_logs(logs)
+    
     return entry
 
-# Enhanced AI response function
+# Enhanced AI response function (now uses the true AI agent)
 def get_enhanced_response(user_input, profile, logs):
-    user_input = user_input.lower()
-    
-    # Get recent context
-    recent_logs = logs[-3:] if logs else []
-    recent_energy = [float(log.get("energy", 5)) for log in recent_logs if log.get("energy")]
-    recent_recovery = [float(log.get("recovery_score", 5)) for log in recent_logs if log.get("recovery_score")]
-    
-    avg_energy = statistics.mean(recent_energy) if recent_energy else 5
-    avg_recovery = statistics.mean(recent_recovery) if recent_recovery else 5
-    
-    # Training suggestions based on recent patterns
-    if "train" in user_input or "workout" in user_input:
-        if recent_logs:
-            recent_training = [log.get("training_done", "") for log in recent_logs]
-            recent_splits = [log.get("split", "") for log in recent_logs]
-            
-            # Check for imbalances
-            push_count = sum(1 for split in recent_splits if "Push" in split)
-            pull_count = sum(1 for split in recent_splits if "Pull" in split)
-            legs_count = sum(1 for split in recent_splits if "Legs" in split)
-            
-            if avg_energy < 6 or avg_recovery < 6:
-                return "💡 You've been feeling low energy lately. I suggest a light mobility session or yoga. Focus on recovery and maybe some band work for shoulder health."
-            elif push_count > pull_count:
-                return "💪 You've been doing more push work. Time for a Pull day! Try: rows, pull-ups, band pull-aparts, and some rear delt work for shoulder balance."
-            elif pull_count > push_count:
-                return "💪 You've been doing more pull work. Time for a Push day! Focus on dips, push-ups, and shoulder-friendly pressing movements."
-            elif legs_count < 1:
-                return "🦵 You haven't trained legs recently. How about a Legs day? Squats, lunges, and some knee-over-toes work for your goals."
-            else:
-                return "🎯 You're in a good rhythm! Based on your goals, I'd suggest a Push day with focus on handstand progressions and shoulder strength."
-        else:
-            return "💪 Great to start training! Based on your goals, let's begin with a Push day. Focus on dips, push-ups, and shoulder-friendly movements."
-    
-    elif "eat" in user_input or "nutrition" in user_input:
-        if profile and profile.get("diet"):
-            diet_style = profile["diet"].get("style", "minimal processed foods")
-            if "intermittent" in diet_style.lower() or profile["diet"].get("intermittent_fasting"):
-                return "🍽️ For your IF schedule, try: eggs with tahini, chicken with vegetables, and some healthy fats. Keep it simple and clean!"
-            else:
-                return "🍽️ Based on your preferences: eggs, chicken, vegetables, tahini, and some quality carbs. Simple, high-protein, and clean!"
-        return "🍽️ How about eggs, tahini, vegetables, and some sourdough? Simple, high-protein, and clean."
-    
-    elif "tired" in user_input or "energy" in user_input or "recovery" in user_input:
-        if avg_energy < 6:
-            return "😴 You've been feeling low energy. Let's prioritize recovery: more sleep, light mobility work, and maybe a rest day. Your body needs it!"
-        else:
-            return "⚡ Your energy has been good! Keep up the momentum with your training. Maybe try a moderate intensity session today."
-    
-    elif "sleep" in user_input:
-        recent_sleep = [float(log.get("sleep_hours", 7)) for log in recent_logs if log.get("sleep_hours")]
-        avg_sleep = statistics.mean(recent_sleep) if recent_sleep else 7
-        if avg_sleep < 7:
-            return "😴 Your sleep has been below 7 hours. Try to get 7-8 hours tonight. Sleep is crucial for muscle building and recovery!"
-        else:
-            return "😴 Your sleep looks good! Keep up the consistent sleep schedule."
-    
-    elif "sore" in user_input or "pain" in user_input:
-        recent_soreness = [log.get("soreness", "") for log in recent_logs if log.get("soreness")]
-        if any("shoulder" in s.lower() for s in recent_soreness):
-            return "⚠️ I notice shoulder soreness in your recent logs. Let's be careful with pressing movements. Focus on mobility, band work, and maybe some light pull exercises."
-        else:
-            return "💪 Some soreness is normal! Make sure to warm up properly and maybe do some light mobility work today."
-    
-    elif "goal" in user_input or "progress" in user_input:
-        if profile and profile.get("goals"):
-            goals = profile["goals"]
-            if "handstand" in str(goals).lower():
-                return "🎯 For your handstand goal: focus on shoulder strength, core stability, and wrist flexibility. Practice wall walks and holds regularly!"
-            elif "pancake" in str(goals).lower():
-                return "🎯 For your pancake goal: work on hip flexibility, hamstring mobility, and adductor strength. Practice straddle stretches daily!"
-            else:
-                return "🎯 Keep focusing on your goals! Consistency is key. Track your progress and celebrate small wins!"
-        return "🎯 Stay focused on your goals! Consistency and patience will get you there."
-    
-    else:
-        return "🤖 I'm here to help! Ask me about training, nutrition, recovery, or your progress. I'm learning from your logs to give better advice!"
+    """Get response from the true AI agent"""
+    return ai_coach.get_ai_response(user_input)
+
+# Page config for mobile
+st.set_page_config(
+    page_title="Yoel's AI Coach",
+    page_icon="💪",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
 # Main app
 def main():
