@@ -328,7 +328,7 @@ def get_smart_response(user_input, profile, logs):
     # Get recent data for context
     recent_logs = logs[-3:] if logs else []
     today_log = logs[-1] if logs else None
-    
+
     if "tired" in user_input or "low energy" in user_input:
         if today_log and float(today_log.get("energy", 5)) < 6:
             return f"Based on your energy ({today_log.get('energy')}/10), let's keep it light: mobility work, band activation, maybe a short calisthenics circuit?"
@@ -467,7 +467,7 @@ def main():
         else:
             response = get_smart_response(user_input, profile, logs)
             if response:  # Only print if there's a response
-                print(f"AI Coach: {response}")
+        print(f"AI Coach: {response}")
 
 if __name__ == "__main__":
     main()

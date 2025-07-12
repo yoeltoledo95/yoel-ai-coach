@@ -1,17 +1,248 @@
 import streamlit as st
+import json
 import pandas as pd
 import plotly.express as px
 import statistics
 from datetime import datetime
-from coach_core.data import load_profile, load_logs, save_logs
-from coach_core.utils import calculate_recovery_score, estimate_training_volume, detect_split
-from coach_core.ai import AICoach
-import json
+import os
+import openai
+from typing import List, Dict, Any
+
+# Load data functions
+def load_profile(path="yoel_profile.json"):
+    try:
+        with open(path, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        st.error(f"Profile file {path} not found!")
+        return {}
+
+def load_logs(path="daily_logs.json"):
+    try:
+        with open(path, "r") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+def save_logs(logs, path="daily_logs.json"):
+    with open(path, "w") as f:
+        json.dump(logs, f, indent=2)
+
+# AI Coach class (integrated from ai_coach.py)
+class AICoach:
+    def __init__(self, profile_path="yoel_profile.json", logs_path="daily_logs.json"):
+        self.profile_path = profile_path
+        self.logs_path = logs_path
+        self.profile = self.load_profile()
+        self.logs = self.load_logs()
+        
+        # Set up OpenAI (you'll need to add your API key)
+        self.client = None
+        if os.getenv("OPENAI_API_KEY"):
+            openai.api_key = os.getenv("OPENAI_API_KEY")
+            self.client = openai.OpenAI()
+    
+    def load_profile(self) -> Dict[str, Any]:
+        """Load user profile from JSON file"""
+        try:
+            with open(self.profile_path, "r") as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return {}
+    
+    def load_logs(self) -> List[Dict[str, Any]]:
+        """Load daily logs from JSON file"""
+        try:
+            with open(self.logs_path, "r") as f:
+                return json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []
+    
+    def analyze_patterns(self) -> str:
+        """Analyze patterns in user's logs for AI context"""
+        if not self.logs:
+            return "No training history available yet."
+        
+        # Analyze recent patterns
+        recent_logs = self.logs[-7:]  # Last 7 days
+        
+        energy_trend = []
+        training_frequency = 0
+        common_soreness = []
+        
+        for log in recent_logs:
+            if 'energy' in log and str(log['energy']).isdigit():
+                energy_trend.append(int(log['energy']))
+            if log.get('training_done') and log['training_done'].strip():
+                training_frequency += 1
+            if log.get('soreness') and log['soreness'] != 'none':
+                common_soreness.append(log['soreness'])
+        
+        analysis = f"Recent Analysis:\n"
+        if energy_trend:
+            avg_energy = sum(energy_trend) / len(energy_trend)
+            analysis += f"- Average energy: {avg_energy:.1f}/10\n"
+        analysis += f"- Training frequency: {training_frequency} days in last week\n"
+        
+        if common_soreness:
+            analysis += f"- Common soreness: {', '.join(set(common_soreness))}\n"
+        
+        return analysis
+    
+    def get_ai_response(self, user_input: str) -> str:
+        """Get intelligent response from GPT based on profile and logs"""
+        if not self.client:
+            return self.get_fallback_response(user_input)
+        
+        # Build context for AI
+        context = f"""
+You are Yoel's personal AI fitness coach. You know him deeply and adapt to his needs.
+
+PROFILE:
+{json.dumps(self.profile, indent=2)}
+
+RECENT PATTERNS:
+{self.analyze_patterns()}
+
+RECENT LOGS (last 3 days):
+{json.dumps(self.logs[-3:], indent=2)}
+
+INSTRUCTIONS:
+- Be encouraging and motivating like a real coach
+- Consider his injuries (shoulder issues, knee is fine now)
+- Suggest training based on his goals (calisthenics, yoga, athletic)
+- Recommend food based on his preferences and training
+- Analyze patterns in his logs to give personalized advice
+- Keep responses conversational and helpful
+
+User says: {user_input}
+
+Respond as Yoel's AI coach:
+"""
+        
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are Yoel's personal AI fitness coach. Be encouraging, knowledgeable, and personalized."},
+                    {"role": "user", "content": context}
+                ],
+                max_tokens=300,
+                temperature=0.7
+            )
+            return response.choices[0].message.content or "I'm here to help with your training and nutrition!"
+        except Exception as e:
+            return self.get_fallback_response(user_input)
+    
+    def get_fallback_response(self, user_input: str) -> str:
+        """Fallback responses when AI is not available"""
+        user_input = user_input.lower()
+        
+        if "tired" in user_input or "low energy" in user_input:
+            return "I see you're feeling tired. Based on your goals, let's do some light mobility work and maybe some gentle yoga. No heavy training today - recovery is just as important as training! 💪"
+        
+        if "what should i train" in user_input or "workout" in user_input:
+            return f"Looking at your {self.profile.get('training_preferences', {}).get('split', 'Push/Pull/Legs')} split, what day are you on? I can suggest specific exercises that work with your calisthenics and yoga preferences while being mindful of your shoulder."
+        
+        if "what should i eat" in user_input or "food" in user_input:
+            return "For your goals and preferences, I'd suggest something with good protein and clean carbs. How about eggs with tahini and some vegetables? Or if you're post-workout, maybe some chicken with rice and fruit?"
+        
+        if "injury" in user_input or "pain" in user_input:
+            return "I'm keeping an eye on your shoulder issues. Remember to do your band work and avoid exercises that cause pain. Your knee is doing well though - we can include more knee work gradually!"
+        
+        return "I'm here to help with your training, nutrition, and recovery! Try asking about what to train today, food suggestions, or how you're feeling. I'm learning from your daily logs to give you better advice over time."
 
 # Initialize AI Coach
 ai_coach = AICoach()
 
 # Helper functions
+def detect_split(training_done):
+    if not training_done or training_done.lower() == "none/rest day":
+        return "Rest"
+    elif "push" in training_done.lower():
+        return "Push"
+    elif "pull" in training_done.lower():
+        return "Pull"
+    elif "legs" in training_done.lower():
+        return "Legs"
+    elif "yoga" in training_done.lower():
+        return "Yoga"
+    elif "mobility" in training_done.lower() or "recovery" in training_done.lower():
+        return "Recovery"
+    else:
+        return "Other"
+
+def calculate_recovery_score(entry):
+    """Calculate recovery score based on various factors"""
+    score = 5.0  # Base score
+    
+    # Energy level (0-10)
+    if 'energy' in entry:
+        try:
+            energy = float(entry['energy'])
+            score += (energy - 5) * 0.3
+        except:
+            pass
+    
+    # Sleep hours
+    if 'sleep_hours' in entry:
+        try:
+            sleep = float(entry['sleep_hours'])
+            if 7 <= sleep <= 9:
+                score += 1.0
+            elif 6 <= sleep < 7 or 9 < sleep <= 10:
+                score += 0.5
+            elif sleep < 6:
+                score -= 1.0
+        except:
+            pass
+    
+    # Sleep quality
+    if 'sleep_quality' in entry:
+        try:
+            quality = float(entry['sleep_quality'])
+            score += (quality - 5) * 0.2
+        except:
+            pass
+    
+    # Stress level (inverse)
+    if 'stress_level' in entry:
+        try:
+            stress = float(entry['stress_level'])
+            score -= (stress - 5) * 0.2
+        except:
+            pass
+    
+    # Training quality
+    if 'training_quality' in entry:
+        try:
+            training_quality = float(entry['training_quality'])
+            score += (training_quality - 5) * 0.1
+        except:
+            pass
+    
+    # Hydration
+    if 'hydration' in entry:
+        try:
+            hydration = float(entry['hydration'])
+            score += (hydration - 5) * 0.1
+        except:
+            pass
+    
+    return max(0, min(10, score))
+
+def estimate_training_volume(training_done):
+    if not training_done or training_done.lower() == "none/rest day":
+        return "none"
+    elif "heavy" in training_done.lower():
+        return "high"
+    elif "moderate" in training_done.lower():
+        return "medium"
+    elif "light" in training_done.lower() or "mobility" in training_done.lower() or "recovery" in training_done.lower():
+        return "low"
+    else:
+        return "medium"
+
 def check_logged_today(logs):
     today = datetime.now().strftime("%Y-%m-%d")
     return any(log.get("date") == today for log in logs)
@@ -36,6 +267,13 @@ def get_yesterday_defaults(logs):
         "notes": yesterday.get("notes", "")
     }
 
+
+
+# Enhanced AI response function (now uses the true AI agent)
+def get_enhanced_response(user_input, profile, logs):
+    """Get response from the true AI agent"""
+    return ai_coach.get_ai_response(user_input)
+
 # Page config for mobile
 st.set_page_config(
     page_title="Yoel's AI Coach",
@@ -49,7 +287,7 @@ def main():
     st.title("💪 Yoel's AI Coach")
     st.markdown("---")
     
-    # Load data using core modules
+    # Load data
     profile = load_profile()
     logs = load_logs()
     
@@ -188,7 +426,7 @@ def log_today_page(logs, logged_today):
             "notes": notes
         }
         
-        # Calculate metrics using core utils
+        # Calculate metrics
         entry["recovery_score"] = str(calculate_recovery_score(entry))
         entry["training_volume"] = estimate_training_volume(training_done)
         entry["split"] = detect_split(training_done)
@@ -302,7 +540,7 @@ def view_trends_page(logs):
         if recovery_scores:
             avg_recovery = statistics.mean(recovery_scores)
             if avg_recovery < 6:
-                st.warning("⚠️ Your recovery scores are low. Consider more rest days.")
+                st.warning("⚠️ Your recovery scores are low. Consider more rest days or lighter training.")
             elif avg_recovery > 8:
                 st.success("✅ Great recovery! You're managing your training load well.")
         
@@ -311,10 +549,66 @@ def view_trends_page(logs):
         if training_days >= 5:
             st.info("🏋️ You're training frequently. Make sure to include recovery days!")
         elif training_days <= 2:
-            st.warning("⚠️ Low training frequency. Consider adding more training days.")
+            st.info("💪 You could increase training frequency if you're feeling good.")
+    
+    # Split summary
+    st.subheader("🗓️ Weekly Split Summary")
+    split_counts = {"Push": 0, "Pull": 0, "Legs": 0, "Recovery": 0, "Other": 0, "None": 0}
+    for log in recent_logs:
+        split = log.get("split") or detect_split(log.get("training_done", ""))
+        if split in split_counts:
+            split_counts[split] += 1
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Push", split_counts["Push"])
+    with col2:
+        st.metric("Pull", split_counts["Pull"])
+    with col3:
+        st.metric("Legs", split_counts["Legs"])
+    
+    # Training days
+    training_days = sum(1 for log in recent_logs if log.get("training_done") and log.get("training_done").lower() != "none")
+    st.metric("🏋️ Training Days", f"{training_days}/{len(recent_logs)}")
 
 def ai_chat_page(profile, logs):
-    st.header("💬 Chat with Your AI Coach")
+    st.header("🤖 AI Coach Chat")
+    
+    if not profile:
+        st.error("Profile not found. Please check yoel_profile.json")
+        return
+    
+    # Show AI status
+    if ai_coach.client:
+        st.success("✅ Connected to GPT - Full AI intelligence available!")
+    else:
+        st.info("ℹ️ Using smart fallback responses. Add OPENAI_API_KEY for full AI features.")
+    
+    # Pattern Analysis Section
+    st.subheader("📊 Your Recent Patterns")
+    if logs:
+        pattern_analysis = ai_coach.analyze_patterns()
+        st.text(pattern_analysis)
+        
+        # Show recent logs summary
+        if len(logs) >= 3:
+            recent_logs = logs[-3:]
+            st.subheader("📝 Recent Activity")
+            for log in recent_logs:
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Date", log.get("date", "Unknown"))
+                with col2:
+                    st.metric("Energy", f"{log.get('energy', 'N/A')}/10")
+                with col3:
+                    st.metric("Training", log.get("training_done", "None").split(" - ")[0] if " - " in log.get("training_done", "") else log.get("training_done", "None"))
+    else:
+        st.warning("No training history available yet. Start logging to see patterns!")
+    
+    st.markdown("---")
+    
+    # Enhanced Chat Interface
+    st.subheader("💬 Chat with Your AI Coach")
     
     # Chat history (simple implementation)
     if "chat_history" not in st.session_state:
@@ -331,7 +625,7 @@ def ai_chat_page(profile, logs):
     user_input = st.text_input("Ask your AI coach:", placeholder="What should I train today? I'm tired... What should I eat?")
     
     if user_input:
-        # Get AI response using core AI module
+        # Get AI response
         response = ai_coach.get_ai_response(user_input)
         
         # Add to chat history
@@ -383,7 +677,7 @@ def pattern_analysis_page(logs):
         st.warning("No data to analyze yet. Start logging to see patterns!")
         return
     
-    # AI Coach pattern analysis using core module
+    # AI Coach pattern analysis
     pattern_analysis = ai_coach.analyze_patterns()
     st.subheader("🤖 AI Analysis")
     st.text(pattern_analysis)
@@ -553,7 +847,7 @@ def log_meals_page(logs):
             today_log["nutrition"] = new_nutrition
             today_log["notes"] = new_notes
             
-            # Save to file using core module
+            # Save to file
             save_logs(logs)
             st.success("✅ Meals and notes updated successfully!")
             st.rerun()
