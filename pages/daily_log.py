@@ -14,18 +14,30 @@ def get_yesterday_defaults(logs):
     
     yesterday = logs[-1]
     return {
-        "mood": yesterday.get("mood", "5"),
-        "energy": yesterday.get("energy", "5"),
-        "sleep_hours": yesterday.get("sleep_hours", "7.0"),
-        "sleep_quality": yesterday.get("sleep_quality", "5"),
-        "stress_level": yesterday.get("stress_level", "5"),
+        "mood": str(yesterday.get("mood", "5")),
+        "energy": str(yesterday.get("energy", "5")),
+        "sleep_hours": str(yesterday.get("sleep_hours", "7.0")),
+        "sleep_quality": str(yesterday.get("sleep_quality", "5")),
+        "stress_level": str(yesterday.get("stress_level", "5")),
         "soreness": yesterday.get("soreness", "none"),
-        "hydration": yesterday.get("hydration", "5"),
+        "hydration": str(yesterday.get("hydration", "5")),
         "training_done": yesterday.get("training_done", ""),
-        "training_quality": yesterday.get("training_quality", "5"),
+        "training_quality": str(yesterday.get("training_quality", "5")),
         "nutrition": yesterday.get("nutrition", ""),
         "notes": yesterday.get("notes", "")
     }
+
+def safe_float(val, default=7.0):
+    """Safely convert value to float, handling None and invalid values"""
+    try:
+        if val is None:
+            return float(default)
+        val_str = str(val).strip()
+        if val_str.lower() == "none" or val_str == "":
+            return float(default)
+        return float(val_str)
+    except (ValueError, TypeError):
+        return float(default)
 
 def log_today_page(logs, logged_today):
     st.header("📊 Daily Log")
@@ -53,7 +65,13 @@ def log_today_page(logs, logged_today):
             energy = st.selectbox("⚡ Energy Level", energy_options,
                                  index=int(defaults.get("energy", "5")) - 1 if defaults.get("energy") and str(defaults.get("energy")).isdigit() else 4)
             
-            sleep_hours = st.number_input("😴 Hours Slept", min_value=0.0, max_value=24.0, value=float(defaults.get("sleep_hours", 7.0)), step=0.5)
+            sleep_hours = st.number_input(
+                "😴 Hours Slept",
+                min_value=0.0,
+                max_value=24.0,
+                value=safe_float(defaults.get("sleep_hours", "7.0")),
+                step=0.5
+            )
             
             sleep_quality_options = ["1 - Terrible", "2 - Bad", "3 - Poor", "4 - Fair", "5 - Okay",
                                    "6 - Good", "7 - Very Good", "8 - Great", "9 - Excellent", "10 - Perfect"]

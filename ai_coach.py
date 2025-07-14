@@ -2,6 +2,8 @@ import json
 from datetime import datetime
 from coach_core.data import load_profile, load_logs, save_logs
 from coach_core.ai import AICoach
+from dotenv import load_dotenv
+load_dotenv()
 
 def log_daily_feedback(ai_coach):
     """Enhanced daily logging with AI insights"""

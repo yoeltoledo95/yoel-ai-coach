@@ -1,3 +1,4 @@
+print('DATA module loaded')
 import json
 from typing import List, Dict, Any, Optional, Tuple
 from .database import CoachDatabase
@@ -41,6 +42,20 @@ def get_default_profile() -> Dict[str, Any]:
         }
     }
 
+def ensure_db_instance(db):
+    """Ensure we have a valid database instance."""
+    if db is None:
+        return CoachDatabase()
+    elif isinstance(db, str):
+        # If it's a string (path), create a new database instance
+        return CoachDatabase(db)
+    elif hasattr(db, 'load_profile') and hasattr(db, 'load_logs'):
+        # It's already a valid database instance
+        return db
+    else:
+        # Fallback to default database
+        return CoachDatabase()
+
 def validate_log_entry(log: Dict[str, Any]) -> bool:
     """Validate a log entry has required fields."""
     required_fields = ["date", "timestamp"]
@@ -51,12 +66,10 @@ def validate_profile_entry(profile: Dict[str, Any]) -> bool:
     return isinstance(profile, dict)
 
 def load_profile(db=None) -> Dict[str, Any]:
-    """Load profile from database (single source of truth)."""
-    db = db or CoachDatabase()
+    db = ensure_db_instance(db)
     try:
         profile = db.load_profile()
         if profile and validate_profile_entry(profile):
-            # Check if this is Yoel's profile (not test data)
             if profile.get("name") == "Yoel":
                 return profile
             else:
@@ -71,7 +84,6 @@ def load_profile(db=None) -> Dict[str, Any]:
             return default_profile
     except Exception as e:
         logger.error(f"Error loading profile from database: {e}")
-        # Only fall back to JSON if database is corrupted/missing
         try:
             with open(PROFILE_PATH, "r") as f:
                 profile = json.load(f)
@@ -80,24 +92,17 @@ def load_profile(db=None) -> Dict[str, Any]:
                     return profile
         except Exception as json_error:
             logger.error(f"JSON fallback also failed: {json_error}")
-        
-        # Create default profile as last resort
         default_profile = get_default_profile()
         save_profile(default_profile, db)
         return default_profile
 
 def save_profile(profile: Dict[str, Any], db=None) -> bool:
-    """Save profile to database (single source of truth)."""
-    db = db or CoachDatabase()
+    db = ensure_db_instance(db)
     try:
         if not validate_profile_entry(profile):
             logger.error("Invalid profile data structure")
             return False
-        
-        # Save to database only
         db.save_profile(profile)
-        
-        # Clear cache since profile changed
         clear_cache()
         return True
     except Exception as e:
@@ -105,12 +110,10 @@ def save_profile(profile: Dict[str, Any], db=None) -> bool:
         return False
 
 def load_logs(db=None) -> List[Dict[str, Any]]:
-    """Load logs from database (single source of truth)."""
-    db = db or CoachDatabase()
+    db = ensure_db_instance(db)
     try:
         logs = db.load_logs()
         if logs:
-            # Validate all log entries
             valid_logs = [log for log in logs if validate_log_entry(log)]
             if len(valid_logs) != len(logs):
                 logger.warning(f"Filtered out {len(logs) - len(valid_logs)} invalid log entries")
@@ -120,11 +123,9 @@ def load_logs(db=None) -> List[Dict[str, Any]]:
             return []
     except Exception as e:
         logger.error(f"Error loading logs from database: {e}")
-        # Only fall back to JSON if database is corrupted/missing
         try:
             with open(LOGS_PATH, "r") as f:
                 logs = json.load(f)
-                # Validate all log entries
                 valid_logs = [log for log in logs if validate_log_entry(log)]
                 if len(valid_logs) != len(logs):
                     logger.warning(f"Filtered out {len(logs) - len(valid_logs)} invalid log entries from JSON")
@@ -132,22 +133,15 @@ def load_logs(db=None) -> List[Dict[str, Any]]:
                 return valid_logs
         except Exception as json_error:
             logger.error(f"JSON fallback also failed: {json_error}")
-        
         return []
 
 def save_logs(logs: List[Dict[str, Any]], db=None) -> bool:
-    """Save logs to database (single source of truth)."""
-    db = db or CoachDatabase()
+    db = ensure_db_instance(db)
     try:
-        # Validate all log entries
         valid_logs = [log for log in logs if validate_log_entry(log)]
         if len(valid_logs) != len(logs):
             logger.warning(f"Filtered out {len(logs) - len(valid_logs)} invalid log entries")
-        
-        # Save to database only
         db.save_logs(valid_logs)
-        
-        # Clear cache since logs changed
         clear_cache()
         return True
     except Exception as e:
@@ -155,15 +149,12 @@ def save_logs(logs: List[Dict[str, Any]], db=None) -> bool:
         return False
 
 def add_log(log: Dict[str, Any], db=None) -> bool:
-    """Add a single log to database."""
-    db = db or CoachDatabase()
+    db = ensure_db_instance(db)
     try:
         if not validate_log_entry(log):
             logger.error("Invalid log entry structure")
             return False
-        
         db.add_log(log)
-        # Clear cache since logs changed
         clear_cache()
         return True
     except Exception as e:
@@ -171,8 +162,7 @@ def add_log(log: Dict[str, Any], db=None) -> bool:
         return False
 
 def get_log_by_date(date: str, db=None) -> Optional[Dict[str, Any]]:
-    """Get log by date from database."""
-    db = db or CoachDatabase()
+    db = ensure_db_instance(db)
     try:
         result = db.get_log_by_date(date)
         return result if result and validate_log_entry(result) else None
@@ -182,11 +172,9 @@ def get_log_by_date(date: str, db=None) -> Optional[Dict[str, Any]]:
 
 @lru_cache(maxsize=128)
 def get_recent_logs(days: int = 7, db=None) -> List[Dict[str, Any]]:
-    """Get recent logs from database."""
-    db = db or CoachDatabase()
+    db = ensure_db_instance(db)
     try:
         logs = db.get_recent_logs(days)
-        # Validate all log entries
         valid_logs = [log for log in logs if validate_log_entry(log)]
         if len(valid_logs) != len(logs):
             logger.warning(f"Filtered out {len(logs) - len(valid_logs)} invalid log entries")
@@ -197,8 +185,7 @@ def get_recent_logs(days: int = 7, db=None) -> List[Dict[str, Any]]:
 
 @lru_cache(maxsize=64)
 def get_stats(db=None) -> Dict[str, Any]:
-    """Get stats from database."""
-    db = db or CoachDatabase()
+    db = ensure_db_instance(db)
     try:
         return db.get_stats()
     except Exception as e:
@@ -207,19 +194,14 @@ def get_stats(db=None) -> Dict[str, Any]:
 
 # Backup/Export/Import functions
 def export_to_json(profile_path: str = PROFILE_PATH, logs_path: str = LOGS_PATH, db=None) -> bool:
-    """Export database data to JSON files for backup."""
-    db = db or CoachDatabase()
+    db = ensure_db_instance(db)
     try:
-        # Export profile
         profile = load_profile(db)
         with open(profile_path, "w") as f:
             json.dump(profile, f, indent=2)
-        
-        # Export logs
         logs = load_logs(db)
         with open(logs_path, "w") as f:
             json.dump(logs, f, indent=2)
-        
         logger.info(f"Successfully exported {len(logs)} logs and profile to JSON")
         return True
     except Exception as e:
@@ -227,18 +209,14 @@ def export_to_json(profile_path: str = PROFILE_PATH, logs_path: str = LOGS_PATH,
         return False
 
 def import_from_json(profile_path: str = PROFILE_PATH, logs_path: str = LOGS_PATH, db=None) -> bool:
-    """Import JSON data to database."""
-    db = db or CoachDatabase()
+    db = ensure_db_instance(db)
     try:
-        # Import profile
         if os.path.exists(profile_path):
             with open(profile_path, "r") as f:
                 profile = json.load(f)
             if validate_profile_entry(profile):
                 save_profile(profile, db)
                 logger.info("Successfully imported profile from JSON")
-        
-        # Import logs
         if os.path.exists(logs_path):
             with open(logs_path, "r") as f:
                 logs = json.load(f)
@@ -246,48 +224,35 @@ def import_from_json(profile_path: str = PROFILE_PATH, logs_path: str = LOGS_PAT
             if valid_logs:
                 save_logs(valid_logs, db)
                 logger.info(f"Successfully imported {len(valid_logs)} logs from JSON")
-        
         return True
     except Exception as e:
         logger.error(f"Error importing from JSON: {e}")
         return False
 
 def check_sync_status(db=None) -> Tuple[bool, Dict[str, Any]]:
-    """Check if database and JSON files are in sync."""
-    db = db or CoachDatabase()
+    db = ensure_db_instance(db)
     try:
-        # Get database data
         db_profile = load_profile(db)
         db_logs = load_logs(db)
-        
-        # Get JSON data
         json_profile = {}
         json_logs = []
-        
         try:
             with open(PROFILE_PATH, "r") as f:
                 json_profile = json.load(f)
         except:
             pass
-        
         try:
             with open(LOGS_PATH, "r") as f:
                 json_logs = json.load(f)
         except:
             pass
-        
-        # Compare
         profile_sync = db_profile == json_profile
         logs_sync = len(db_logs) == len(json_logs)
-        
-        # More detailed comparison for logs (check dates)
         if logs_sync and db_logs and json_logs:
             db_dates = set(log.get("date") for log in db_logs)
             json_dates = set(log.get("date") for log in json_logs)
             logs_sync = db_dates == json_dates
-        
         is_synced = profile_sync and logs_sync
-        
         status = {
             "is_synced": is_synced,
             "profile_sync": profile_sync,
@@ -297,22 +262,18 @@ def check_sync_status(db=None) -> Tuple[bool, Dict[str, Any]]:
             "db_profile_keys": list(db_profile.keys()),
             "json_profile_keys": list(json_profile.keys())
         }
-        
         return is_synced, status
     except Exception as e:
         logger.error(f"Error checking sync status: {e}")
         return False, {"error": str(e)}
 
 def migrate_from_json(db=None):
-    """Migrate existing JSON data to database (one-time operation)."""
-    db = db or CoachDatabase()
+    db = ensure_db_instance(db)
     try:
         db.migrate_from_json()
     except Exception as e:
         logger.error(f"Error migrating from JSON: {e}")
 
-# Cache invalidation function
 def clear_cache():
-    """Clear all caches when data is updated."""
     get_recent_logs.cache_clear()
     get_stats.cache_clear() 
