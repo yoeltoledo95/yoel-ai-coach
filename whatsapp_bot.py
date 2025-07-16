@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 # WhatsApp API Configuration
-WHATSAPP_API_TOKEN = os.getenv('WHATSAPP_API_TOKEN', 'EAAK78HuEqmoBPHx145FSLpPeP1THiwbL4pzRJpLERGahlZBEtN9ZCqAZBZCyfRTdEZBmBFOTF5J4SXxL5zgsYPTPEro89qPDgtp6KXiZBy3qNogCrPO75XXbjnksHhf0fh90xsYurtCU0LrVNGFjrlQm43qKUQKMkc62UC3hrq58udyo0V1lMJpIvh8gvUEJBHa7sFVrLVEj3C7nJ905zo2yzDVgSI1eaYuKzFLdhxWaLsUJ57xB4dTqbIzgZDZD')
+WHATSAPP_API_TOKEN = os.getenv('WHATSAPP_API_TOKEN')
 WHATSAPP_PHONE_NUMBER_ID = os.getenv('WHATSAPP_PHONE_NUMBER_ID', '')  # Add your phone number ID here
 WHATSAPP_API_URL = f"https://graph.facebook.com/v18.0/{WHATSAPP_PHONE_NUMBER_ID}/messages"
 
