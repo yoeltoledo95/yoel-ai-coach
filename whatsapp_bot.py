@@ -7,11 +7,13 @@ Movement-focused AI fitness coach via WhatsApp
 import os
 import json
 import logging
+import requests
 from datetime import datetime, timedelta
 from typing import Dict, List, Any
 from flask import Flask, request, jsonify
 from coach_core.ai import AICoach
 from coach_core.data import load_profile, load_logs, save_logs
+import openai
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -19,8 +21,22 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
+# WhatsApp API Configuration
+WHATSAPP_API_TOKEN = os.getenv('WHATSAPP_API_TOKEN', 'EAAK78HuEqmoBPHx145FSLpPeP1THiwbL4pzRJpLERGahlZBEtN9ZCqAZBZCyfRTdEZBmBFOTF5J4SXxL5zgsYPTPEro89qPDgtp6KXiZBy3qNogCrPO75XXbjnksHhf0fh90xsYurtCU0LrVNGFjrlQm43qKUQKMkc62UC3hrq58udyo0V1lMJpIvh8gvUEJBHa7sFVrLVEj3C7nJ905zo2yzDVgSI1eaYuKzFLdhxWaLsUJ57xB4dTqbIzgZDZD')
+WHATSAPP_PHONE_NUMBER_ID = os.getenv('WHATSAPP_PHONE_NUMBER_ID', '')  # Add your phone number ID here
+WHATSAPP_API_URL = f"https://graph.facebook.com/v18.0/{WHATSAPP_PHONE_NUMBER_ID}/messages"
+
 # WhatsApp interactions file
 WHATSAPP_INTERACTIONS_FILE = "whatsapp_interactions.json"
+
+# Extraction categories
+EXTRACTION_KEYS = [
+    "goals", "achievements", "struggles", "injuries", "weekly_reflection",
+    "preferences", "feedback", "session_log", "questions", "mood",
+    "intentions", "lifestyle", "milestones"
+]
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def load_whatsapp_interactions() -> List[Dict[str, Any]]:
     """Load WhatsApp interactions from file"""
@@ -37,6 +53,66 @@ def save_whatsapp_interactions(interactions: List[Dict[str, Any]]):
             json.dump(interactions, f, indent=2)
     except Exception as e:
         logger.error(f"Error saving WhatsApp interactions: {e}")
+
+def send_whatsapp_message(phone_number: str, message: str) -> bool:
+    """Send a WhatsApp message using Meta's Cloud API"""
+    try:
+        headers = {
+            'Authorization': f'Bearer {WHATSAPP_API_TOKEN}',
+            'Content-Type': 'application/json'
+        }
+        
+        payload = {
+            "messaging_product": "whatsapp",
+            "to": phone_number,
+            "type": "text",
+            "text": {"body": message}
+        }
+        
+        response = requests.post(WHATSAPP_API_URL, headers=headers, json=payload)
+        
+        if response.status_code == 200:
+            logger.info(f"✅ WhatsApp message sent successfully to {phone_number}")
+            return True
+        else:
+            logger.error(f"❌ Failed to send WhatsApp message: {response.status_code} - {response.text}")
+            return False
+            
+    except Exception as e:
+        logger.error(f"❌ Error sending WhatsApp message: {e}")
+        return False
+
+def ai_extract_info(user_message):
+    prompt = (
+        "Extract all relevant fitness coaching information from the following message.\n"
+        f"Return a JSON object with these keys: {', '.join(EXTRACTION_KEYS)}.\n"
+        "If a category is not present, return null for that key.\n"
+        f"Message: '{user_message}'"
+    )
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0
+    )
+    try:
+        extracted = json.loads(response['choices'][0]['message']['content'])
+    except Exception as e:
+        logger.error(f"Error parsing extraction JSON: {e}")
+        extracted = {key: None for key in EXTRACTION_KEYS}
+    return extracted
+
+def log_raw_message(user_id, user_message):
+    logger.info(f"User {user_id} message: {user_message}")
+    # Optionally, append to a file or database
+
+def log_extracted_info(user_id, extracted_info):
+    logger.info(f"Extracted info for {user_id}: {json.dumps(extracted_info, indent=2)}")
+    # Optionally, append to a file or database
+
+def update_database(user_id, extracted_info):
+    # Stub: Replace with your actual DB logic
+    logger.info(f"Updating database for {user_id} with: {json.dumps(extracted_info)}")
+    # Example: Save to SQLite, JSON, etc.
 
 class WhatsAppCoach:
     """WhatsApp AI Fitness Coach"""
@@ -90,20 +166,21 @@ whatsapp_coach = WhatsAppCoach()
 @app.route('/webhook', methods=['GET'])
 def verify_webhook():
     """Verify webhook for WhatsApp API"""
-    # This will be implemented when you set up Meta developer account
     mode = request.args.get('hub.mode')
     token = request.args.get('hub.verify_token')
     challenge = request.args.get('hub.challenge')
-    
-    # TODO: Add your verify token here
-    verify_token = "YOUR_VERIFY_TOKEN"
-    
+
+    # Use environment variable for verify token
+    verify_token = os.getenv("WHATSAPP_VERIFY_TOKEN", "yoel_secret_token")
+
     if mode and token:
         if mode == 'subscribe' and token == verify_token:
-            return challenge
+            logger.info("✅ Webhook verification successful")
+            return challenge, 200
         else:
+            logger.error("❌ Webhook verification failed")
             return 'Forbidden', 403
-    
+
     return 'Bad Request', 400
 
 @app.route('/webhook', methods=['POST'])
@@ -111,7 +188,6 @@ def handle_webhook():
     """Handle incoming WhatsApp messages"""
     try:
         data = request.get_json()
-        
         # Extract message data
         if 'entry' in data and len(data['entry']) > 0:
             entry = data['entry'][0]
@@ -119,19 +195,33 @@ def handle_webhook():
                 change = entry['changes'][0]
                 if 'value' in change and 'messages' in change['value']:
                     message = change['value']['messages'][0]
-                    
                     user_id = message['from']
                     user_message = message['text']['body']
-                    
-                    # Get AI response
+
+                    # 1. Log raw message
+                    log_raw_message(user_id, user_message)
+
+                    # 2. Extract info using OpenAI
+                    extracted_info = ai_extract_info(user_message)
+
+                    # 3. Log extracted info
+                    log_extracted_info(user_id, extracted_info)
+
+                    # 4. Update database (stub)
+                    update_database(user_id, extracted_info)
+
+                    # 5. Get AI response (existing logic)
                     ai_response = whatsapp_coach.handle_message(user_message, user_id)
-                    
-                    # TODO: Send response back via WhatsApp API
-                    logger.info(f"User {user_id}: {user_message}")
-                    logger.info(f"AI Response: {ai_response}")
-                    
+
+                    # Send response back via WhatsApp API
+                    if send_whatsapp_message(user_id, ai_response):
+                        logger.info(f"✅ User {user_id}: {user_message}")
+                        logger.info(f"✅ AI Response sent: {ai_response}")
+                    else:
+                        logger.error(f"❌ Failed to send response to {user_id}")
+
                     return jsonify({'status': 'success'})
-        
+
         return jsonify({'status': 'no_message'})
         
     except Exception as e:
@@ -144,7 +234,9 @@ def health_check():
     return jsonify({
         'status': 'healthy',
         'version': '2.0',
-        'timestamp': datetime.now().isoformat()
+        'timestamp': datetime.now().isoformat(),
+        'whatsapp_token_configured': bool(WHATSAPP_API_TOKEN),
+        'phone_number_id_configured': bool(WHATSAPP_PHONE_NUMBER_ID)
     })
 
 if __name__ == '__main__':
@@ -152,5 +244,15 @@ if __name__ == '__main__':
     logger.info("📱 Movement-focused AI fitness coach")
     logger.info("🔄 Weekly coaching loop: Monday plan → daily feedback → Sunday reflection")
     
+    if WHATSAPP_API_TOKEN:
+        logger.info("✅ WhatsApp API token configured")
+    else:
+        logger.warning("⚠️ WhatsApp API token not configured")
+    
+    if WHATSAPP_PHONE_NUMBER_ID:
+        logger.info("✅ WhatsApp Phone Number ID configured")
+    else:
+        logger.warning("⚠️ WhatsApp Phone Number ID not configured")
+    
     # Run the Flask app
-    app.run(host='0.0.0.0', port=5000, debug=True) 
+    app.run(host='0.0.0.0', port=5001, debug=True) 
