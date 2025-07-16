@@ -2,23 +2,52 @@
   "name": "Yoel",
   "age": 30,
   "goals": [
+    "push to handstand",
+    "pancake flexibility",
+    "fix muscular imbalances",
+    "boost energy",
+    "build muscle",
     "strength",
     "endurance",
     "mobility"
   ],
   "training_preferences": {
-    "split": "Push/Pull/Legs",
-    "training_days": 4,
+    "split": "4-6 days per week",
+    "training_days": 5,
     "preferred_style": "calisthenics",
     "secondary_activities": [
+      "kettlebells",
       "yoga",
-      "mobility"
-    ]
+      "band work",
+      "athletic movement"
+    ],
+    "no_machines": true,
+    "focus": "movement quality over quantity"
+  },
+  "specific_skills": {
+    "push_to_handstand": "in progress",
+    "pancake": "working on hip mobility and hamstring flexibility",
+    "muscular_imbalances": "shoulder issues, working on symmetry",
+    "athletic_movement": "focus on natural patterns"
   },
   "injury_history": {
     "shoulder": "ongoing issues, needs careful management",
     "knee": "recovered, can do more work now"
   },
+  "mentor_influences": [
+    "Ido Portal - movement complexity and natural patterns",
+    "Emmet Louis - end-range mobility strength",
+    "Tom Merrick - clean calisthenics and flexibility",
+    "Dylan Werner - isometric strength and body control",
+    "Patrick Beach - fluid mobility and breath connection",
+    "Everydamnandré - kettlebell conditioning and mental toughness",
+    "JTM_FIT - aesthetic movement and core strength",
+    "FitnessFAQs - evidence-based strength and shoulder health",
+    "Austin Dunham - high-volume calisthenics",
+    "KneesOverToesGuy - bulletproofing joints",
+    "Dr. Andy Galpin - performance science and recovery",
+    "Marcus Filly - tempo training and joint-friendly bodybuilding"
+  ],
   "nutrition_preferences": {
     "diet": "flexible, focuses on protein and clean carbs",
     "favorites": [
@@ -30,6 +59,8 @@
   "recovery_needs": {
     "sleep_target": 7.5,
     "stress_management": "important",
-    "mobility_work": "daily"
-  }
+    "mobility_work": "daily",
+    "active_recovery": "movement-based recovery"
+  },
+  "training_philosophy": "elite, AI-assisted personal training that adapts daily based on training history, recovery status, physical goals, and preferences"
 }
