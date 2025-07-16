@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 # WhatsApp API Configuration
-WHATSAPP_API_TOKEN = os.getenv('WHATSAPP_API_TOKEN', 'REMOVED_WHATSAPP_TOKEN')
+WHATSAPP_API_TOKEN = os.getenv('WHATSAPP_API_TOKEN')
 WHATSAPP_PHONE_NUMBER_ID = os.getenv('WHATSAPP_PHONE_NUMBER_ID', '')  # Add your phone number ID here
 WHATSAPP_API_URL = f"https://graph.facebook.com/v18.0/{WHATSAPP_PHONE_NUMBER_ID}/messages"
 
