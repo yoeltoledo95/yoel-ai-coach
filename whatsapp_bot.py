@@ -13,6 +13,7 @@ from typing import Dict, List, Any
 from flask import Flask, request, jsonify
 from coach_core.ai import AICoach
 from coach_core.data import load_profile, load_logs, save_logs
+from coach_core.user_memory import user_memory_db
 import openai
 
 # Configure logging
@@ -109,10 +110,24 @@ def log_extracted_info(user_id, extracted_info):
     logger.info(f"Extracted info for {user_id}: {json.dumps(extracted_info, indent=2)}")
     # Optionally, append to a file or database
 
-def update_database(user_id, extracted_info):
-    # Stub: Replace with your actual DB logic
-    logger.info(f"Updating database for {user_id} with: {json.dumps(extracted_info)}")
-    # Example: Save to SQLite, JSON, etc.
+def update_database(user_id, user_message, ai_response, extracted_info):
+    """Update user memory database with extracted information"""
+    try:
+        # Store the interaction in the database
+        success = user_memory_db.store_interaction(
+            user_id=user_id,
+            raw_message=user_message,
+            ai_response=ai_response,
+            extracted_info=extracted_info
+        )
+        
+        if success:
+            logger.info(f"✅ Updated database for user {user_id}")
+        else:
+            logger.error(f"❌ Failed to update database for user {user_id}")
+            
+    except Exception as e:
+        logger.error(f"❌ Error updating database: {e}")
 
 class WhatsAppCoach:
     """WhatsApp AI Fitness Coach"""
@@ -207,11 +222,11 @@ def handle_webhook():
                     # 3. Log extracted info
                     log_extracted_info(user_id, extracted_info)
 
-                    # 4. Update database (stub)
-                    update_database(user_id, extracted_info)
-
-                    # 5. Get AI response (existing logic)
+                    # 4. Get AI response (existing logic)
                     ai_response = whatsapp_coach.handle_message(user_message, user_id)
+
+                    # 5. Update database with all information
+                    update_database(user_id, user_message, ai_response, extracted_info)
 
                     # Send response back via WhatsApp API
                     if send_whatsapp_message(user_id, ai_response):
