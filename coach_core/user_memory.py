@@ -81,6 +81,19 @@ class UserMemoryDB:
                 )
             """)
             
+            # Training images table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS training_images (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id TEXT NOT NULL,
+                    image_path TEXT NOT NULL,
+                    caption TEXT,
+                    mime_type TEXT,
+                    timestamp TEXT NOT NULL,
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
             conn.commit()
             logger.info("✅ User memory database initialized")
     
@@ -90,6 +103,14 @@ class UserMemoryDB:
         try:
             with sqlite3.connect(self.db_path, timeout=20.0) as conn:
                 cursor = conn.cursor()
+                
+                # Convert dictionary values to JSON strings for SQLite storage
+                def convert_to_json(value):
+                    if value is None:
+                        return None
+                    if isinstance(value, dict):
+                        return json.dumps(value)
+                    return str(value)
                 
                 # Store the interaction
                 cursor.execute("""
@@ -104,19 +125,19 @@ class UserMemoryDB:
                     datetime.now().isoformat(),
                     raw_message,
                     ai_response,
-                    extracted_info.get('goals'),
-                    extracted_info.get('achievements'),
-                    extracted_info.get('struggles'),
-                    extracted_info.get('injuries'),
-                    extracted_info.get('weekly_reflection'),
-                    extracted_info.get('preferences'),
-                    extracted_info.get('feedback'),
-                    extracted_info.get('session_log'),
-                    extracted_info.get('questions'),
-                    extracted_info.get('mood'),
-                    extracted_info.get('intentions'),
-                    extracted_info.get('lifestyle'),
-                    extracted_info.get('milestones')
+                    convert_to_json(extracted_info.get('goals')),
+                    convert_to_json(extracted_info.get('achievements')),
+                    convert_to_json(extracted_info.get('struggles')),
+                    convert_to_json(extracted_info.get('injuries')),
+                    convert_to_json(extracted_info.get('weekly_reflection')),
+                    convert_to_json(extracted_info.get('preferences')),
+                    convert_to_json(extracted_info.get('feedback')),
+                    convert_to_json(extracted_info.get('session_log')),
+                    convert_to_json(extracted_info.get('questions')),
+                    convert_to_json(extracted_info.get('mood')),
+                    convert_to_json(extracted_info.get('intentions')),
+                    convert_to_json(extracted_info.get('lifestyle')),
+                    convert_to_json(extracted_info.get('milestones'))
                 ))
                 
                 # Update or create user profile in the same transaction
@@ -130,15 +151,15 @@ class UserMemoryDB:
                     
                     if extracted_info.get('goals'):
                         updates.append("current_goals = ?")
-                        params.append(extracted_info['goals'])
+                        params.append(convert_to_json(extracted_info['goals']))
                     
                     if extracted_info.get('injuries'):
                         updates.append("known_injuries = ?")
-                        params.append(extracted_info['injuries'])
+                        params.append(convert_to_json(extracted_info['injuries']))
                     
                     if extracted_info.get('preferences'):
                         updates.append("preferences = ?")
-                        params.append(extracted_info['preferences'])
+                        params.append(convert_to_json(extracted_info['preferences']))
                     
                     if updates:
                         params.extend([datetime.now().isoformat(), user_id])
@@ -159,9 +180,9 @@ class UserMemoryDB:
                         user_id,
                         datetime.now().isoformat(),
                         datetime.now().isoformat(),
-                        extracted_info.get('goals'),
-                        extracted_info.get('injuries'),
-                        extracted_info.get('preferences')
+                        convert_to_json(extracted_info.get('goals')),
+                        convert_to_json(extracted_info.get('injuries')),
+                        convert_to_json(extracted_info.get('preferences'))
                     ))
                 
                 conn.commit()
@@ -170,6 +191,33 @@ class UserMemoryDB:
                 
         except Exception as e:
             logger.error(f"❌ Error storing interaction: {e}")
+            return False
+    
+    def store_training_image(self, user_id: str, training_log: Dict[str, Any]) -> bool:
+        """Store training image information in the database"""
+        try:
+            with sqlite3.connect(self.db_path, timeout=20.0) as conn:
+                cursor = conn.cursor()
+                
+                # Store the training image
+                cursor.execute("""
+                    INSERT INTO training_images (
+                        user_id, image_path, caption, mime_type, timestamp
+                    ) VALUES (?, ?, ?, ?, ?)
+                """, (
+                    user_id,
+                    training_log.get('image_path'),
+                    training_log.get('caption'),
+                    training_log.get('mime_type'),
+                    training_log.get('timestamp')
+                ))
+                
+                conn.commit()
+                logger.info(f"✅ Stored training image for user {user_id}")
+                return True
+                
+        except Exception as e:
+            logger.error(f"❌ Error storing training image: {e}")
             return False
     
     def _update_user_profile(self, user_id: str, extracted_info: Dict[str, Any]):
@@ -247,6 +295,26 @@ class UserMemoryDB:
                 
         except Exception as e:
             logger.error(f"❌ Error getting user injuries: {e}")
+            return []
+    
+    def get_user_training_images(self, user_id: str, limit: int = 10) -> List[Dict[str, Any]]:
+        """Get recent training images for a user"""
+        try:
+            with sqlite3.connect(self.db_path, timeout=20.0) as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                
+                cursor.execute("""
+                    SELECT * FROM training_images 
+                    WHERE user_id = ? 
+                    ORDER BY timestamp DESC 
+                    LIMIT ?
+                """, (user_id, limit))
+                
+                return [dict(row) for row in cursor.fetchall()]
+                
+        except Exception as e:
+            logger.error(f"❌ Error getting user training images: {e}")
             return []
     
     def get_weekly_interactions(self, user_id: str, days: int = 7) -> List[Dict[str, Any]]:

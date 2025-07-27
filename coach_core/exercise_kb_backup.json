@@ -1,0 +1,1370 @@
+[
+  {
+    "name": "Bodyweight Squat",
+    "category": "Foundational Movement Patterns",
+    "description": "A fundamental strength-building movement involving bending at the knees and hips and rising back up, improving daily functional tasks like getting up from a seated position. It engages quadriceps, hamstrings, glutes, adductors, and core muscles. 1",
+    "tags": [
+      "Lower Body",
+      "Compound",
+      "Functional Movement",
+      "Quads",
+      "Glutes",
+      "Hamstrings",
+      "Core",
+      "Bodyweight"
+    ],
+    "progressions": [
+      "Goblet Squat",
+      "Double Kettlebell Front Squat",
+      "Barbell Front Squat",
+      "Barbell Back Squat",
+      "Pistol Squat 4"
+    ],
+    "regressions": [
+      "Box Squat",
+      "reducing depth 7"
+    ],
+    "contraindications": [
+      "Significant knee pain",
+      "lower back rounding",
+      "heels lifting off the ground 7"
+    ],
+    "cues": [
+      "Initiate by pushing glutes and hips backward before bending knees",
+      "direct gaze forward",
+      "maintain upright torso",
+      "engage core",
+      "\"push the floor apart\" 4"
+    ],
+    "equipment": [
+      "None (bodyweight)",
+      "Kettlebell",
+      "Dumbbell",
+      "Barbell",
+      "Squat Rack",
+      "Box/Bench 7"
+    ],
+    "pattern": "core",
+    "discipline": "general",
+    "primary_muscles": [
+      "quadriceps",
+      "glutes"
+    ],
+    "secondary_muscles": [
+      "hamstrings",
+      "core"
+    ]
+  },
+  {
+    "name": "Good Morning",
+    "category": "Foundational Movement Patterns",
+    "description": "A posteriorly top-loaded hip hinge exercise that primarily strengthens the lower back, hamstrings, and glutes, developing a strong posterior chain. It involves flexing at the hip while maintaining rigidity at the knees, similar to picking something up off the ground. 1",
+    "tags": [
+      "Posterior Chain",
+      "Hinge",
+      "Compound",
+      "Glutes",
+      "Hamstrings",
+      "Lower Back",
+      "Core"
+    ],
+    "progressions": [
+      "Gradually increase load (e.g.",
+      "0.5x bodyweight",
+      "gradual bi-weekly increases); Zercher Good Mornings 9"
+    ],
+    "regressions": [
+      "Bodyweight Good Morning",
+      "Romanian Deadlifts (RDLs) with lighter weight",
+      "Glute-Ham Raise (GHH) 9"
+    ],
+    "contraindications": [
+      "Previous spine injuries/pain",
+      "limited shoulder mobility 9"
+    ],
+    "cues": [
+      "Push hips back",
+      "maintain straight/neutral spine",
+      "engage core",
+      "squeeze shoulder blades to create a \"shelf\" for the bar",
+      "\"big air belly\" breathing 9"
+    ],
+    "equipment": [
+      "Barbell",
+      "Squat Rack",
+      "Pins 9"
+    ],
+    "pattern": "hinge",
+    "discipline": "general",
+    "primary_muscles": [
+      "glutes",
+      "hamstrings"
+    ],
+    "secondary_muscles": [
+      "latissimus_dorsi",
+      "core"
+    ]
+  },
+  {
+    "name": "Forward Lunge",
+    "category": "Foundational Movement Patterns",
+    "description": "A unilateral, bodyweight exercise that works muscles throughout the lower body by taking a large step forward and lowering until both legs are at nearly a 90-degree angle. It targets quadriceps, glutes, hamstrings, hip flexors, and adductors, while also increasing core stabilization. 18",
+    "tags": [
+      "Lower Body",
+      "Unilateral",
+      "Functional Movement",
+      "Quads",
+      "Glutes",
+      "Hamstrings",
+      "Core",
+      "Bodyweight"
+    ],
+    "progressions": [
+      "Walking Lunges",
+      "Overhead Lunges",
+      "Weighted Lunges",
+      "Jumping Lunges",
+      "Bulgarian Split Squats 18"
+    ],
+    "regressions": [
+      "Smaller steps forward (decrease range of motion/depth) 18"
+    ],
+    "contraindications": [
+      "Noticeable knee pain; knee extending beyond leading toes; rear knee resting on ground; leaning backward/forward or hyperextending neck 18"
+    ],
+    "cues": [
+      "Take a big step forward",
+      "keep feet hip-width apart",
+      "engage core and keep back straight",
+      "use arms for balance",
+      "keep neck neutral",
+      "drive through heel of front foot to return to standing 18"
+    ],
+    "equipment": [
+      "None (bodyweight)",
+      "Kettlebell",
+      "Barbell",
+      "Dumbbells 22"
+    ],
+    "pattern": "core",
+    "discipline": "general",
+    "primary_muscles": [
+      "quadriceps",
+      "glutes"
+    ],
+    "secondary_muscles": [
+      "hamstrings",
+      "core"
+    ]
+  },
+  {
+    "name": "Push-up",
+    "category": "Foundational Movement Patterns",
+    "description": "A classic bodyweight exercise that works multiple muscle groups including the chest (pectorals), shoulders (deltoids, rotator cuff), and triceps, while engaging the core for stability. It involves pushing your body weight away from the floor. 1",
+    "tags": [
+      "Upper Body",
+      "Compound",
+      "Functional Movement",
+      "Chest",
+      "Shoulders",
+      "Triceps",
+      "Core",
+      "Bodyweight"
+    ],
+    "progressions": [
+      "Feet Elevated Push-up",
+      "Paused Push-up (increased time under tension)",
+      "Single-Arm Lever Push-up",
+      "One-Arm Push-up 8"
+    ],
+    "regressions": [
+      "Incline Push-up (hands on elevated surface)",
+      "Eccentric Focused Push-up (slow lowering)",
+      "Hand Release Push-up 8"
+    ],
+    "contraindications": [
+      "Thumb arthritis",
+      "shoulder injuries (consult professional) 8"
+    ],
+    "cues": [
+      "Hands slightly outside shoulder-width at chest level",
+      "feet hip-width apart",
+      "hips in line with shoulders",
+      "neutral lower back",
+      "head in line with spine",
+      "engage core",
+      "squeeze glutes",
+      "push ground away 23"
+    ],
+    "equipment": [
+      "None (bodyweight)",
+      "Sliders/Slide Board (for lever push-up) 8"
+    ],
+    "pattern": "core",
+    "discipline": "general",
+    "primary_muscles": [
+      "pectorals",
+      "deltoids"
+    ],
+    "secondary_muscles": [
+      "triceps",
+      "core"
+    ]
+  },
+  {
+    "name": "Inverted Row",
+    "category": "Foundational Movement Patterns",
+    "description": "An effective bodyweight exercise to strengthen pulling muscles (back and biceps) by pulling the body toward a bar. The difficulty adjusts with body angle: more horizontal is harder, more upright is easier. It also engages midsection muscles for rigidity. 1",
+    "tags": [
+      "Upper Body",
+      "Compound",
+      "Functional Movement",
+      "Back",
+      "Biceps",
+      "Core",
+      "Bodyweight"
+    ],
+    "progressions": [
+      "Inverted Row with Elevated Feet",
+      "Weighted Inverted Row",
+      "Inverted Rows with Slow Negatives",
+      "Single Arm Anti-Rotational Row",
+      "Single Arm Rotational Row 19"
+    ],
+    "regressions": [
+      "More upright torso position",
+      "higher bar height 19"
+    ],
+    "contraindications": [
+      "Joint stress from fast eccentrics 19"
+    ],
+    "cues": [
+      "Grab bar with overhand grip",
+      "tuck body underneath",
+      "body straight as an arrow",
+      "engage glutes and abs",
+      "pull through elbows to bring chest to bar",
+      "full range of motion",
+      "maintain rigid body 19"
+    ],
+    "equipment": [
+      "Bar (e.g.",
+      "Smith machine bar",
+      "squat rack)",
+      "Suspension Trainer 19"
+    ],
+    "pattern": "core",
+    "discipline": "general",
+    "primary_muscles": [
+      "latissimus_dorsi",
+      "biceps"
+    ],
+    "secondary_muscles": [
+      "core"
+    ]
+  },
+  {
+    "name": "Russian Twist",
+    "category": "Foundational Movement Patterns",
+    "description": "A core exercise involving seated torso rotations, primarily engaging the obliques and stabilizing the core. It helps govern the body's ability to produce and resist rotational forces, crucial for sports and core stability. 2",
+    "tags": [
+      "Core",
+      "Rotation",
+      "Obliques",
+      "Stability",
+      "Bodyweight"
+    ],
+    "progressions": [
+      "Russian Twist with Medicine Ball",
+      "Decline Crunches (for ab strength) 5"
+    ],
+    "regressions": [
+      "Reduced range of motion",
+      "feet on floor",
+      "no weight"
+    ],
+    "contraindications": [
+      "Lower back pain (if form is compromised)"
+    ],
+    "cues": [
+      "Engage core",
+      "maintain stable trunk",
+      "move slowly - it is a stability exercise (the slower you move, the more muscle will engage to help you balance) 5"
+    ],
+    "equipment": [
+      "None (bodyweight)",
+      "Medicine Ball 5"
+    ],
+    "pattern": "rotation",
+    "discipline": "general",
+    "primary_muscles": [
+      "core",
+      "obliques"
+    ],
+    "secondary_muscles": []
+  },
+  {
+    "name": "Walking",
+    "category": "Foundational Movement Patterns",
+    "description": "The most foundational cyclical movement pattern used to move from one place to another. It is a low-impact cardio exercise vital for overall mobility and should be incorporated into warm-up and cool-down routines. 1",
+    "tags": [
+      "Locomotion",
+      "Cardio",
+      "Endurance",
+      "Full Body",
+      "Low Impact"
+    ],
+    "progressions": [
+      "Jogging",
+      "Sprinting",
+      "Farmer's Walk",
+      "Hill Running 5"
+    ],
+    "regressions": [
+      "Slower pace",
+      "shorter duration"
+    ],
+    "contraindications": [
+      "Severe joint pain",
+      "acute injury"
+    ],
+    "cues": [
+      "Maintain natural stride",
+      "focus on rhythmic breathing 3"
+    ],
+    "equipment": [
+      "None (bodyweight)"
+    ],
+    "pattern": "core",
+    "discipline": "general",
+    "primary_muscles": [],
+    "secondary_muscles": []
+  },
+  {
+    "name": "Barbell Back Squat",
+    "category": "Gym",
+    "description": "The barbell back squat is a highly regarded leg exercise, frequently positioned as a cornerstone in lower body training programs. Performed with a barbell resting on the upper traps in a squat rack, this multi-joint movement effectively recruits the largest and most powerful muscles in the body, including the quadriceps, hamstrings, and glutes, while also significantly engaging the core for stability. It places a particular emphasis on strengthening the posterior chain.27",
+    "tags": [
+      "Lower Body",
+      "Compound",
+      "Strength",
+      "Quads",
+      "Glutes",
+      "Hamstrings",
+      "Core",
+      "Barbell."
+    ],
+    "progressions": [
+      "Increasing the weight lifted is the primary progression. Deeper squat depth can also be pursued gradually as mobility and control improve.7"
+    ],
+    "regressions": [
+      "Modifications include the Box Squat",
+      "which helps build control and teaches hip engagement",
+      "and the Goblet Squat",
+      "which aids in maintaining an upright torso. The Barbell Front Squat can also serve as a regression for those needing less spinal loading than a back squat.7"
+    ],
+    "contraindications": [
+      "Individuals with lumbar instability",
+      "significant knee pain",
+      "or poor foundational mobility should approach this exercise with caution or opt for regressions.7"
+    ],
+    "cues": [
+      "Key cues include \"create tension on the bar\" by squeezing it into the upper back, \"keep your chest up\" to prevent rounding, and \"screw your feet into the floor\" to engage glutes and prevent knee caving. Other effective cues are \"drive knees out,\" \"drive shoulders back up into the bar,\" \"get your back tight,\" \"break the knees, then go straight down,\" \"press the big toe into the ground,\" and \"squat like you're in a Smith machine\" (straight up and down).11"
+    ],
+    "equipment": [
+      "Barbell",
+      "Squat Rack",
+      "Weight Plates.27"
+    ],
+    "pattern": "core",
+    "discipline": "strength",
+    "primary_muscles": [
+      "quadriceps",
+      "glutes"
+    ],
+    "secondary_muscles": [
+      "hamstrings",
+      "core"
+    ]
+  },
+  {
+    "name": "Barbell Deadlift",
+    "category": "Gym",
+    "description": "The barbell deadlift is a near-full body exercise that primarily targets the posterior chain muscles, including the glutes, hamstrings, and lower back. It also significantly recruits various other muscle groups, such as the core and forearms, making it a highly efficient compound movement. This exercise involves lifting a loaded barbell from the floor to a standing position, contributing to improved posture and core stability by strengthening the muscles that support the spine.28",
+    "tags": [
+      "Posterior Chain",
+      "Compound",
+      "Strength",
+      "Glutes",
+      "Hamstrings",
+      "Lower Back",
+      "Core",
+      "Forearms",
+      "Barbell."
+    ],
+    "progressions": [
+      "The primary progression involves gradually increasing the weight lifted",
+      "adhering to the principle of progressive overload. Variations such as the conventional deadlift and sumo deadlift can also serve as progressions or alternatives to target muscles differently.29"
+    ],
+    "regressions": [
+      "For beginners",
+      "mastering the hip hinge movement is crucial before adding significant load. Starting with lighter weights is recommended. Romanian Deadlifts (RDLs) can also serve as a preparatory exercise for the full deadlift.29"
+    ],
+    "contraindications": [
+      "Common errors to avoid include rounding the spine",
+      "over-emphasizing knee bend",
+      "losing head position",
+      "or rounding the shoulders",
+      "as these can increase the risk of injury.28"
+    ],
+    "cues": [
+      "Initiate the movement with feet hip to shoulder-width apart. Key cues involve \"bracing the abs,\" maintaining a \"flat back,\" keeping the \"bar close to the shins,\" and \"pushing into the floor to lift.\" The movement should involve \"maintaining the head and torso angle\" until the bar passes the knees, then \"standing upright\" by \"driving the hips forward\".28"
+    ],
+    "equipment": [
+      "Barbell",
+      "Weight Plates.28"
+    ],
+    "pattern": "core",
+    "discipline": "strength",
+    "primary_muscles": [
+      "glutes",
+      "hamstrings"
+    ],
+    "secondary_muscles": [
+      "latissimus_dorsi",
+      "core",
+      "forearms"
+    ]
+  },
+  {
+    "name": "Barbell Bench Press",
+    "category": "Gym",
+    "description": "The barbell bench press is a highly effective multi-joint exercise for developing upper body strength. It efficiently targets virtually all major upper-body muscle groups, including the pectorals (chest), deltoids (shoulders), and triceps (back of the arms). The exercise is performed lying on a flat bench, pressing a barbell upwards from the chest.31",
+    "tags": [
+      "Upper Body",
+      "Compound",
+      "Strength",
+      "Chest",
+      "Shoulders",
+      "Triceps",
+      "Barbell."
+    ],
+    "progressions": [
+      "Increasing the weight is the most common progression. Other variations include the paused bench press",
+      "close-grip bench press",
+      "and incline or decline bench presses to target different muscle fibers or ranges of motion.31"
+    ],
+    "regressions": [
+      "Alternatives for building strength before heavy benching include Dumbbell Bench Press and Push-ups.8"
+    ],
+    "contraindications": [
+      "Common mistakes to avoid include excessive wrist flexion",
+      "a loose grip on the bar",
+      "performing the lift with a flat back (lack of arch)",
+      "neglecting leg drive",
+      "and flaring the elbows excessively",
+      "as these can lead to increased stress and potential injury to the wrists",
+      "shoulders",
+      "and pectorals.31"
+    ],
+    "cues": [
+      "Essential cues include keeping the \"feet planted\" for stability and leg drive, maintaining a \"slight arch in the lower back,\" positioning the \"eyes slightly behind the bar\" for proper path, and actively \"bending the bar\" to promote external shoulder rotation. Other cues involve \"pinching the glutes,\" \"pinching and bringing down shoulder blades,\" \"performing a lat pull down with the bar\" to engage the lats, \"driving the chest up to meet the bar,\" keeping \"triceps to lats\" or \"elbows straight forward,\" and \"driving feet through the floor\" for a strong finish.12"
+    ],
+    "equipment": [
+      "Barbell",
+      "Weight Bench",
+      "Squat Rack (for unracking).31"
+    ],
+    "pattern": "core",
+    "discipline": "strength",
+    "primary_muscles": [
+      "pectorals",
+      "deltoids"
+    ],
+    "secondary_muscles": [
+      "triceps"
+    ]
+  },
+  {
+    "name": "Standing Barbell Overhead Press",
+    "category": "Gym",
+    "description": "Also known as the Strict Press or Military Press, the standing barbell overhead press is a vertical pressing movement that primarily engages the anterior and medial deltoids (shoulders), upper trapezius (traps), and triceps. It involves pressing a barbell directly overhead from a standing position, demanding significant upper body strength and core stability.32",
+    "tags": [
+      "Upper Body",
+      "Compound",
+      "Strength",
+      "Shoulders",
+      "Triceps",
+      "Traps",
+      "Barbell."
+    ],
+    "progressions": [
+      "The primary progression is to increase the weight. The Paused Overhead Press is a variation that can also increase difficulty by enhancing time under tension.32"
+    ],
+    "regressions": [
+      "Alternatives for developing overhead pressing strength include the Seated Dumbbell Press or using a Machine Shoulder Press",
+      "which can offer more support or reduce spinal loading.25"
+    ],
+    "contraindications": [
+      "Common mistakes to avoid include using the legs to assist the press (which turns it into a push press)",
+      "pressing the bar forward instead of directly overhead",
+      "allowing elbows to drift backward",
+      "and attempting to move the feet to re-rack the bar before safely lowering it.32"
+    ],
+    "cues": [
+      "Key cues include \"bracing the abs tight\" to maintain a neutral back, avoiding pausing at the bottom after the first repetition to utilize stretch reflex, \"aiming for your nose on the way up and down\" to keep the bar path efficient, and \"reaching as high as you can\" to ensure full lockout. Other cues include \"tucking the ribs into the belly button,\" \"squeezing the glutes,\" and \"pressing straight up and together\" while bringing the \"bicep to the ear\".32"
+    ],
+    "equipment": [
+      "Barbell",
+      "Squat Rack.32"
+    ],
+    "pattern": "core",
+    "discipline": "strength",
+    "primary_muscles": [
+      "deltoids",
+      "triceps"
+    ],
+    "secondary_muscles": [
+      "trapezius"
+    ]
+  },
+  {
+    "name": "Lat Pulldown",
+    "category": "Gym",
+    "description": "The lat pulldown is a vertical pulling movement performed on a cable machine, specifically designed to target the latissimus dorsi (lats), which are the largest muscles in the upper body. It also strengthens the teres major, lower and mid trapezius, rhomboids, posterior deltoids, and biceps. This exercise mimics the pulling mechanics of a pull-up but offers adjustable resistance, making it accessible for beginners and a versatile tool for advanced lifters to develop back width and strength.34",
+    "tags": [
+      "Upper Body",
+      "Pull",
+      "Back",
+      "Lats",
+      "Biceps",
+      "Shoulders",
+      "Cable Machine."
+    ],
+    "progressions": [
+      "Increasing the resistance is the primary progression. Variations like narrow or underhand grips can shift emphasis to the biceps or lower lats. Single-arm pulldowns improve unilateral strength",
+      "and kneeling pulldowns engage the core more aggressively.34"
+    ],
+    "regressions": [
+      "Beginners can start with lighter weights or resistance bands. The straight-arm pulldown isolates the lats with minimal bicep involvement",
+      "serving as a good preparatory exercise.34"
+    ],
+    "contraindications": [
+      "Common mistakes to avoid include excessively arching the back",
+      "using momentum instead of controlled movement",
+      "pulling the bar down too far (which can stress the shoulder joint)",
+      "flaring the elbows",
+      "and not controlling the eccentric (negative) phase of the movement",
+      "as these can reduce muscle activation and increase injury risk.34"
+    ],
+    "cues": [
+      "Sit comfortably with feet flat and upper thighs tucked under the pad. Grasp the bar with a wide, overhand grip. \"Pull from your armpits\" to activate the lats, bringing the bar to chin level. \"Squeeze shoulder blades together\" and \"keep chest up, core tight, and shoulders down and back.\" Drive elbows toward the ribcage. Pause and squeeze at the bottom, then control the bar's gradual ascent.34"
+    ],
+    "equipment": [
+      "Cable Pulley Machine",
+      "Resistance Band (for regressions).34"
+    ],
+    "pattern": "pull",
+    "discipline": "strength",
+    "primary_muscles": [
+      "latissimus_dorsi",
+      "latissimus_dorsi"
+    ],
+    "secondary_muscles": [
+      "biceps",
+      "deltoids"
+    ]
+  },
+  {
+    "name": "Leg Press",
+    "category": "Gym",
+    "description": "The leg press is a resistance training exercise performed by pushing the legs against a weighted platform. It is highly effective for building leg strength and increasing muscle mass, primarily targeting the quadriceps and glutes. The design of the machine allows for adjustable foot placement, which can help isolate specific muscles like the hamstrings or glutes, making it valuable for addressing muscle imbalances or weaknesses.36",
+    "tags": [
+      "Lower Body",
+      "Strength",
+      "Quads",
+      "Glutes",
+      "Hamstrings",
+      "Machine."
+    ],
+    "progressions": [
+      "The primary progression involves increasing the weight on the platform. Single-leg press variations can also be used to increase difficulty and address unilateral strength.36"
+    ],
+    "regressions": [
+      "Reducing the weight is the most direct regression. Limiting the range of motion can also make the exercise more accessible for beginners or those with mobility limitations.37"
+    ],
+    "contraindications": [
+      "Common mistakes include allowing the knees to collapse inwards (indicating weak glutes)",
+      "locking out the knees at the top of the movement (which shifts tension to the joints and can cause strain)",
+      "and allowing the heels to hang off the foot pad or lift during the press (which places undue strain on the knees and reduces muscle activation).36"
+    ],
+    "cues": [
+      "Position feet hip-width apart so knees form 90-degree angles. Grip the handles, \"keep your back and head against the pad,\" and \"keep your core engaged.\" Lower the platform by slowly bending the knees (inhaling), then push the weight back up by extending the legs (exhaling). Focus on \"equal weight in the big toe, pinky toe, and heel\" and \"spreading the feet apart\" or \"driving the knees to the shoulders\".36"
+    ],
+    "equipment": [
+      "Leg Press Machine (available in 45-degree",
+      "vertical",
+      "or horizontal configurations).36"
+    ],
+    "pattern": "core",
+    "discipline": "strength",
+    "primary_muscles": [
+      "quadriceps",
+      "glutes"
+    ],
+    "secondary_muscles": [
+      "hamstrings"
+    ]
+  },
+  {
+    "name": "Single-Arm Dumbbell Row",
+    "category": "Gym",
+    "description": "The single-arm dumbbell row is a unilateral exercise performed by holding a dumbbell in one hand while supporting the body with the opposite hand and knee on a bench. This movement effectively targets the upper back muscles, including the latissimus dorsi, rhomboids, and trapezius, as well as the biceps. It is valuable for improving unilateral strength, addressing muscular imbalances, and enhancing core stability.19",
+    "tags": [
+      "Upper Body",
+      "Unilateral",
+      "Strength",
+      "Back",
+      "Biceps",
+      "Core",
+      "Dumbbell."
+    ],
+    "progressions": [
+      "Increasing the weight of the dumbbell is a direct progression. More advanced variations include the Renegade Row (performed from a plank position",
+      "demanding greater core stability) and the Single-Arm Anti-Rotational Row.19"
+    ],
+    "regressions": [
+      "For beginners",
+      "using a lighter weight or reducing the range of motion can make the exercise more manageable. A supported standing row can also be used as a preparatory movement.38"
+    ],
+    "contraindications": [
+      "It is important to avoid torso rotation",
+      "excessive arching of the lower back",
+      "or shrugging the shoulders during the lift",
+      "as these can compromise form and increase injury risk.38"
+    ],
+    "cues": [
+      "Begin by holding a dumbbell in one hand and placing the opposite knee and hand on a bench. \"Contract your abdominal/core muscles\" to stiffen the torso and stabilize the spine, maintaining a \"flat back\" and \"head aligned with your spine.\" \"Depress and retract your scapulae\" (pull shoulders down and back). Extend the arm holding the dumbbell towards the floor without allowing the torso to rotate. \"Pull the dumbbell upwards, bending your elbow and pulling your upper arm backwards,\" keeping the arm close to the side of the body.38"
+    ],
+    "equipment": [
+      "Dumbbell",
+      "Bench.38"
+    ],
+    "pattern": "core",
+    "discipline": "strength",
+    "primary_muscles": [
+      "latissimus_dorsi",
+      "biceps"
+    ],
+    "secondary_muscles": [
+      "core"
+    ]
+  },
+  {
+    "name": "Downward-Facing Dog (Adho Mukha Svanasana)",
+    "category": "Yoga",
+    "description": "One of the most recognizable and popular yoga poses, Downward-Facing Dog forms an inverted V-shape with the body. It effectively stretches the hips, hamstrings, and calves while simultaneously strengthening the ankles, quadriceps, and shoulders. This pose also tones the abdominal muscles, decompresses the spinal column, and can help alleviate fatigue.10",
+    "tags": [
+      "Yoga",
+      "Flexibility",
+      "Strength",
+      "Balance",
+      "Hamstrings",
+      "Calves",
+      "Shoulders",
+      "Core",
+      "Mind-Body."
+    ],
+    "progressions": [
+      "Advanced variations include performing the pose on one leg with the opposite arm extended. Other related poses like Dolphin Pose and Puppy Pose can also serve as progressions.10"
+    ],
+    "regressions": [
+      "For those with limitations",
+      "dropping to the knees (Tabletop position) can make the pose more accessible. Hands can be placed wider or fingers angled out for tight shoulders. Bending the knees or widening the legs can accommodate tight hamstrings",
+      "and using forearms or a wedge-shaped block can alleviate wrist sensitivity.10"
+    ],
+    "contraindications": [
+      "Individuals with carpal tunnel syndrome or arthritis",
+      "high blood pressure",
+      "eye or inner ear infections",
+      "or those in late-term pregnancy should avoid or modify this pose.10"
+    ],
+    "cues": [
+      "\"Spread your fingers\" and \"root the index finger and thumb.\" \"Press down and forward through the knuckles\" and \"rotate your biceps forward.\" \"Squeeze your elbows toward each other\" and \"lift the inner armpit.\" \"Root your shoulder blades against your back ribs\" and \"draw your belly button in towards your spine.\" \"Firm your quadriceps\" and \"press your heels toward the floor.\" \"Relax your neck\" and \"lift up through sits bones,\" \"drawing thighs toward the back wall\" and \"shifting weight back into hips\".10"
+    ],
+    "equipment": [
+      "Yoga Mat",
+      "Optional: Wedge-shaped block.10"
+    ],
+    "pattern": "core",
+    "discipline": "yoga",
+    "primary_muscles": [
+      "hamstrings",
+      "gastrocnemius"
+    ],
+    "secondary_muscles": [
+      "deltoids",
+      "core"
+    ]
+  },
+  {
+    "name": "Warrior I (Virabhadrasana I)",
+    "category": "Yoga",
+    "description": "Warrior I is a powerful standing yoga pose that simultaneously strengthens and stretches various parts of the body. It builds strength in the legs, buttocks (glutes), hip flexors, and shins, while stretching the hamstrings, calves, and ankles. The pose also lengthens the psoas and stretches the upper body and arms, contributing to power in the back and improving balance and focus.6",
+    "tags": [
+      "Yoga",
+      "Standing",
+      "Strength",
+      "Flexibility",
+      "Balance",
+      "Legs",
+      "Glutes",
+      "Hips",
+      "Shoulders",
+      "Core",
+      "Mind-Body."
+    ],
+    "progressions": [
+      "To deepen the pose",
+      "one can touch the palms overhead",
+      "gaze up towards the hands",
+      "or gently arch the spine backward. More advanced variations involve bringing the front palm flat on the floor or aiming for the front thigh to be parallel to the floor.6"
+    ],
+    "regressions": [
+      "Beginners or those with limitations can take a shorter stance or keep feet hip-distance apart for increased stability. Practicing Warrior I seated in a chair or placing hands on hips or the chair for support can also make it more accessible. For shoulder discomfort",
+      "bending elbows into a \"Cactus pose\" can relieve strain. Raising the back heel on a sandbag can help with back heel grounding.6"
+    ],
+    "contraindications": [
+      "This pose should be avoided or modified by individuals with leg",
+      "knee",
+      "hip",
+      "or shoulder injuries",
+      "hamstring or groin tears",
+      "hip replacements",
+      "diarrhea",
+      "weak heart conditions",
+      "or high blood pressure. Those who tend to easily lose balance should use support.6"
+    ],
+    "cues": [
+      "\"Align the front knee over the ankle\" and \"anchor the outer edge of the back foot to the ground.\" \"Draw the shoulders down\" and \"tuck the tailbone under.\" Engage the muscles on the outer side of the bent knee to prevent it from drifting inward. \"Lift your front hip points\" to maintain an upright pelvis. \"Press evenly through the center of your front heel and the outer edge of your back foot.\" \"Reach through your fingertips\".6"
+    ],
+    "equipment": [
+      "Yoga Mat",
+      "Optional: Chair",
+      "Sandbag.6"
+    ],
+    "pattern": "core",
+    "discipline": "yoga",
+    "primary_muscles": [
+      "glutes",
+      "deltoids"
+    ],
+    "secondary_muscles": [
+      "core"
+    ]
+  },
+  {
+    "name": "Child's Pose (Balasana)",
+    "category": "Yoga",
+    "description": "Child's Pose is a deeply restorative yoga posture often used as a resting pose within a sequence or for calming the body before or after practice. It effectively releases tension in the low back, shoulders, and neck, while lengthening and stretching the spine. This pose also calms the central nervous system, stretches the hips, knees, thighs, and ankles, and gently massages the internal organs. It is known for its ability to reduce stress, fatigue, headaches, and insomnia.42",
+    "tags": [
+      "Yoga",
+      "Restorative",
+      "Flexibility",
+      "Relaxation",
+      "Spine",
+      "Hips",
+      "Knees",
+      "Ankles",
+      "Mind-Body."
+    ],
+    "progressions": [
+      "The Extended Child's Pose",
+      "with arms outstretched in front",
+      "engages and stretches the back muscles and shoulders more actively. Coming up on tented fingertips can deepen the stretch.45"
+    ],
+    "regressions": [
+      "To enhance comfort",
+      "a blanket can be placed beneath the sitting bones if sitting on heels is uncomfortable",
+      "or under the forehead if it doesn't reach the floor. Spreading the knees wide or extending the arms behind with palms up can also modify the pose for different body types or to relax shoulders.44"
+    ],
+    "contraindications": [
+      "Individuals with knee injuries",
+      "ankle injuries",
+      "low blood pressure",
+      "or ear/eye infections should exercise caution. Pregnant individuals should raise their head and chest with a bolster. Those with low back pathologies may find relief by using a bolster under the knees.44"
+    ],
+    "cues": [
+      "\"Kneel down and touch your big toes together, then lower your hips back to sit on your heels.\" \"Fold forward, resting your torso over your thighs (or between them if knees are wide).\" \"Extend your arms in front (palms down) or back (palms up).\" \"Rest your forehead on the mat.\" \"Lengthen and widen the spine with each inhale,\" and \"sink deeper into the pose with each exhale.\" \"Keep the arms engaged by reaching through the hands,\" \"sink down into the hips,\" and \"relax the shoulders down, away from the ears.\" \"Allow the body to dissolve into the mat,\" \"notice the points of pressure,\" and \"let go of any tension\".44"
+    ],
+    "equipment": [
+      "Yoga Mat",
+      "Optional: Blanket",
+      "Bolster",
+      "Block",
+      "Eye Pillow.44"
+    ],
+    "pattern": "core",
+    "discipline": "yoga"
+  },
+  {
+    "name": "Cat-Cow Pose (Marjaryasana-Bitilasana)",
+    "category": "Yoga",
+    "description": "Cat-Cow is a gentle, flowing sequence between two poses that serves as an excellent warm-up for the spine, increasing its mobility and relieving tension in the upper body, including the back, shoulders, and neck. In Cat Pose (Marjaryasana), the spine is rounded on an exhale, drawing the abdomen in. In Cow Pose (Bitilasana), the lower back is curved, and the head and sternum are lifted on an inhale.42",
+    "tags": [
+      "Yoga",
+      "Flow",
+      "Flexibility",
+      "Spine",
+      "Back",
+      "Shoulders",
+      "Neck",
+      "Core",
+      "Mind-Body."
+    ],
+    "progressions": [
+      "As the spine becomes more accustomed to bending",
+      "one can explore deeper movements. The Cat-Cow flow can also be performed in standing or seated variations.49"
+    ],
+    "regressions": [
+      "A slower pace and focusing on a smaller range of motion can make the movement more accessible for beginners or those with limited mobility.49"
+    ],
+    "contraindications": [
+      "Individuals with diastasis recti",
+      "particularly during or after pregnancy",
+      "should avoid or modify this pose.49"
+    ],
+    "cues": [
+      "Begin in a Tabletop position with \"hips directly over your knees\" and \"hands slightly ahead of your shoulders.\" For Cow Pose, \"inhale and arch your back by lowering your belly, lifting your chin and sternum, and broadening your collarbones.\" For Cat Pose, \"exhale and bring your abdomen in, arching your spine and bringing your head and pelvis down.\" \"Move with your breath,\" initiating the movement \"from your hips, not your neck.\" \"Keep the back of your neck long\" and \"your core slightly toned\".42"
+    ],
+    "equipment": [
+      "Yoga Mat.48"
+    ],
+    "pattern": "core",
+    "discipline": "yoga",
+    "primary_muscles": [
+      "latissimus_dorsi",
+      "deltoids"
+    ],
+    "secondary_muscles": [
+      "core"
+    ]
+  },
+  {
+    "name": "Mountain Pose (Tadasana)",
+    "category": "Yoga",
+    "description": "Often regarded as the \"mother of all yoga poses,\" Mountain Pose is a foundational standing posture that appears simple but demands significant awareness and balance. It effectively decompresses the spine, strengthens the entire leg and pelvic girdle, and tones the abdominal muscles. Regular practice contributes to improved posture and ignites the nervous system.42",
+    "tags": [
+      "Yoga",
+      "Standing",
+      "Foundation",
+      "Balance",
+      "Posture",
+      "Legs",
+      "Core",
+      "Mind-Body."
+    ],
+    "progressions": [
+      "To refine alignment",
+      "practicing against a wall can be beneficial. Using a yoga strap looped around the shins to push out against it can activate the abductors (outer hips). Squeezing a block between the inner thighs can activate the adductors (inner thighs).51"
+    ],
+    "regressions": [
+      "For those needing greater stability",
+      "standing with feet hip-width apart can provide a wider base of support.50"
+    ],
+    "contraindications": [
+      "Individuals experiencing headaches",
+      "insomnia",
+      "or high blood pressure should approach this pose with caution.50"
+    ],
+    "cues": [
+      "\"Stand straight with feet hip-width apart or together.\" \"Spread all 10 toes\" and \"find equal weight in the four corners of your feet.\" \"Firm your quadriceps\" and \"slightly rotate the inner thighs backward.\" To engage the core, \"lengthen your tailbone\" and \"draw your pubic bone up,\" as you \"draw your hip points in toward your navel.\" \"Breathe into your back body\" and \"lift your sternum.\" \"Root your shoulder blades against your back ribs\" and \"lift through the crown of your head,\" softening your gaze. \"Draw your lower ribs back\" if they tend to jut forward.50"
+    ],
+    "equipment": [
+      "Yoga Mat",
+      "Optional: Wall",
+      "Yoga Strap",
+      "Block.51"
+    ],
+    "pattern": "core",
+    "discipline": "yoga",
+    "primary_muscles": [
+      "core"
+    ]
+  },
+  {
+    "name": "Tree Pose (Vrksasana)",
+    "category": "Yoga",
+    "description": "Tree Pose is a balancing posture that cultivates a sense of groundedness through the strength of the standing leg while simultaneously teaching the ability to reach tall. It tones leg muscles, engages core muscles, enhances balancing abilities, and aids in spinal alignment. This pose builds confidence and improves posture, fostering continuous engagement of ankles, legs, and core to maintain equilibrium.52",
+    "tags": [
+      "Yoga",
+      "Balance",
+      "Standing",
+      "Legs",
+      "Core",
+      "Hips",
+      "Mind-Body."
+    ],
+    "progressions": [
+      "Progressions involve moving the hands from heart center to extending the arms overhead",
+      "symbolizing \"growing branches.\" Advanced variations include Standing Lotus or single-leg knee tucks (from a plank",
+      "as a related core progression).52"
+    ],
+    "regressions": [
+      "For increased stability",
+      "one can use a \"kickstand\" position with toes on the mat or practice while standing a few inches from a wall. Placing the ankle on the opposite shin while seated in a chair",
+      "or simply keeping hands on the hips",
+      "can also make the pose more accessible.52"
+    ],
+    "contraindications": [
+      "Individuals experiencing vertigo",
+      "arthritis",
+      "or ankle pain/sensitivity should exercise caution. If lifting arms causes shoulder pain",
+      "numbness",
+      "tingling",
+      "or shooting pain",
+      "hands should remain on hips.52"
+    ],
+    "cues": [
+      "\"Shift your weight to one foot\" and \"find your drishti\" (a steady gazing spot). \"Place your foot somewhere along your inner leg line, avoiding the knee.\" \"Direct your bent knee behind you to open your hips.\" \"Maintain a slight bend in your standing leg.\" \"Keep your weight in the center of your foot\" and \"engage your core to protect your low back and maintain spinal length.\" \"Lift your chest\" and \"draw your shoulder blades down your back\".52"
+    ],
+    "equipment": [
+      "Yoga Mat",
+      "Optional: Wall",
+      "Chair",
+      "Block.52"
+    ],
+    "pattern": "core",
+    "discipline": "yoga",
+    "primary_muscles": [
+      "core"
+    ]
+  },
+  {
+    "name": "Corpse Pose (Savasana)",
+    "category": "Yoga",
+    "description": "Corpse Pose, also known as Savasana, is a restorative yoga posture typically performed at the conclusion of a yoga session. The practitioner lies face up with legs comfortably spread and arms relaxed alongside the body. This pose is crucial for recovering from the physical and mental challenges of a yoga sequence, allowing the body to relax deeply and prepare for meditation. It promotes overall relaxation, calms the nervous system and mind, and can alleviate stress, fatigue, headaches, and insomnia, while also contributing to lower blood pressure.42",
+    "tags": [
+      "Yoga",
+      "Restorative",
+      "Relaxation",
+      "Mind-Body",
+      "Stress Relief",
+      "Recovery."
+    ],
+    "progressions": [
+      "The progression in Savasana is often internal",
+      "focusing on deepening relaxation",
+      "mindfulness",
+      "and preparing for meditation through specific breathing techniques or guided visualization.46"
+    ],
+    "regressions": [
+      "To enhance comfort",
+      "a bolster can be placed under the knees to relieve low back tension or pain. For pregnant individuals",
+      "raising the head and chest with a bolster or folded blankets is recommended. An eye pillow can also be used to block out light and deepen focus.46"
+    ],
+    "contraindications": [
+      "Individuals with low back pathologies may experience pain when lying flat and should utilize support under the knees. Pregnant women require elevation of the head and chest. Those with severe ear or eye infections should exercise caution.46"
+    ],
+    "cues": [
+      "\"Gently recline onto your back and extend your legs.\" \"Release your legs, soften the groin, and let your feet turn out evenly and naturally.\" \"Position your lower back by lifting your pelvis, pressing it toward your tailbone, and then resting it back onto the mat.\" \"Allow your arms to settle alongside the body, palms facing upward to open the chest.\" \"Close your eyes and take a deep inhale.\" \"Scan your body for any residual tension and breathe into that space.\" \"Allow the body to dissolve into the mat, feeling it sink heavily into your space.\" \"Notice the points of pressure along the backside of the body,\" and \"let go of any tension that may be residing in the body\".46"
+    ],
+    "equipment": [
+      "Yoga Mat",
+      "Optional: Bolster",
+      "Blanket",
+      "Towel",
+      "Eye Pillow.46"
+    ],
+    "pattern": "core",
+    "discipline": "yoga"
+  },
+  {
+    "name": "Power Clean",
+    "category": "Weightlifting",
+    "description": "The Power Clean is an Olympic lift that involves lifting a barbell from the floor to the shoulders in one explosive, dynamic movement. It emphasizes speed and quickness, primarily developing explosive power, strength, and coordination throughout the legs, hips, and upper body. This lift is a cornerstone for enhancing overall athleticism and agility.14",
+    "tags": [
+      "Weightlifting",
+      "Olympic Lift",
+      "Power",
+      "Strength",
+      "Explosive",
+      "Full Body",
+      "Barbell."
+    ],
+    "progressions": [
+      "The ultimate progression is the Full Power Clean",
+      "which combines all elements from the floor to the receiving position. Increasing the weight lifted is a continuous progression. Other advanced variations include the Hang Power Clean (performed from above or below the knees) and the Knee Pause Power Clean",
+      "which focuses on specific phases of the lift.14"
+    ],
+    "regressions": [
+      "To build up to the Power Clean",
+      "individuals can start with a Muscle Clean from the Hip",
+      "focusing on the hip extension and elbow wrap. Mastering the Front Squat is also crucial to ensure a correct receiving position. Lighter weights are essential for technique development.14"
+    ],
+    "contraindications": [
+      "It is critical to avoid rounding the low back or excessive hyperextension of the low back if the torso becomes too erect",
+      "as these can significantly increase the risk of injury. Loss of control during the lowering phase should also be prevented.56"
+    ],
+    "cues": [
+      "Begin with \"feet shoulder-width apart\" and \"toes slightly turned out.\" Utilize a \"hookgrip\" for a secure hold. Position the \"bar approximately 1 inch in front of the shins.\" Initiate the lift by \"forcefully extending the hips and knees,\" ensuring the \"torso angle remains constant.\" Keep the \"shoulders over or slightly ahead of the bar\" and the \"bar close to the shins/thighs.\" Rapidly \"shrug the shoulders\" and \"pull the body under the bar,\" catching it at the \"anterior deltoids and clavicles\" in a quarter-squat position.14"
+    ],
+    "equipment": [
+      "Barbell",
+      "Weight Plates (bumper plates recommended for controlled drops).56"
+    ],
+    "pattern": "core",
+    "discipline": "weightlifting"
+  },
+  {
+    "name": "Power Snatch",
+    "category": "Weightlifting",
+    "description": "The Power Snatch is a highly technical Olympic lift, similar to the Power Clean but distinguished by a considerably wider grip and a final bar position overhead. It is a dynamic movement executed from the floor to overhead in one continuous motion. This exercise develops explosive power, speed, and technical proficiency, demanding significant mobility through the hips, ankles, shoulders, and mid-to-upper back.54",
+    "tags": [
+      "Weightlifting",
+      "Olympic Lift",
+      "Power",
+      "Explosive",
+      "Full Body",
+      "Barbell."
+    ],
+    "progressions": [
+      "Increasing the weight is the primary progression. Variations like the Hang Power Snatch (from various positions like above or below the knee) and the Dip Power Snatch are used to refine specific phases of the lift and enhance rate of force development.58"
+    ],
+    "regressions": [
+      "Preparatory exercises include the Muscle Snatch",
+      "which focuses on the pull and turnover without a squat",
+      "and Hang Snatch variations from higher positions (e.g.",
+      "upper thigh) to simplify the initial pull.58"
+    ],
+    "contraindications": [
+      "Significant mobility limitations in the hips",
+      "ankles",
+      "shoulders",
+      "or mid-to-upper back can impede proper execution and increase injury risk. Poor body awareness and incorrect form",
+      "particularly allowing the bar to drift too far from the body",
+      "can lead to negative training effects.54"
+    ],
+    "cues": [
+      "\"Squat down with hips lower than shoulders\" and \"grasp the bar evenly with a wide pronated grip.\" Position the \"bar approximately 1 inch in front of the shins.\" \"Forcefully extend the hips and knees,\" ensuring these joints extend at the same rate. \"Keep the torso angle constant\" and \"shoulders over or slightly ahead of the bar.\" \"Rapidly shrug the shoulders\" and \"pull the body under the bar,\" catching it \"over and slightly behind the ears with fully extended elbows\" in a quarter-squat position.57"
+    ],
+    "equipment": [
+      "Barbell",
+      "Weight Plates (bumper plates recommended).57"
+    ],
+    "pattern": "core",
+    "discipline": "weightlifting"
+  },
+  {
+    "name": "Romanian Deadlift (RDL)",
+    "category": "Weightlifting",
+    "description": "The Romanian Deadlift (RDL) is a deadlift variation that emphasizes a hip hinge movement with minimal knee bend, primarily focusing on strengthening the posterior chain muscles. This includes the hamstrings, glutes, and erector spinae. The RDL is crucial for developing powerful hip extension and establishing correct body positioning, which is a requirement for optimal alignment during other major lifts like the conventional deadlift.30",
+    "tags": [
+      "Weightlifting",
+      "Hinge",
+      "Posterior Chain",
+      "Hamstrings",
+      "Glutes",
+      "Lower Back",
+      "Barbell."
+    ],
+    "progressions": [
+      "The primary progression is to increase the weight lifted. Single-leg RDLs are an advanced progression that further challenges balance and unilateral strength.9"
+    ],
+    "regressions": [
+      "For those new to the movement or with limited hamstring flexibility",
+      "starting with lighter weights is advisable. Good Mornings can also be used as a primary movement to reinforce the hip hinge pattern before progressing to the RDL.9"
+    ],
+    "contraindications": [
+      "It is essential to maintain proper posture throughout the movement. Avoid overarching or slouching the spine",
+      "allowing the shoulders to round forward",
+      "locking the knees excessively",
+      "or overextending the neck",
+      "as these can lead to injury",
+      "particularly in the lower back.30"
+    ],
+    "cues": [
+      "\"Stand with your feet hip to shoulder-width apart\" and position the \"barbell over the midfoot.\" \"Draw in and brace the abs,\" \"lock the shoulder blades back and down,\" and maintain a \"neutral spine.\" \"Drive the hips back,\" keeping the \"shins as vertically as possible.\" \"Unlock the knees\" slightly and \"reverse the pattern, driving the hips back\" to lower the bar only as far as good posture can be maintained and the hamstrings are at full length.30"
+    ],
+    "equipment": [
+      "Barbell",
+      "Weight Plates.30"
+    ],
+    "pattern": "hinge",
+    "discipline": "weightlifting",
+    "primary_muscles": [
+      "hamstrings",
+      "glutes"
+    ],
+    "secondary_muscles": [
+      "latissimus_dorsi"
+    ]
+  },
+  {
+    "name": "Standing Hamstring Stretch",
+    "category": "Flexibility",
+    "description": "The standing hamstring stretch is a simple and effective way to target the hamstring muscles (biceps femoris, semitendinosus, and semimembranosus) located on the back of the thigh. These muscles are crucial for knee bending and hip extension. This stretch also indirectly engages the calves, adductors (inner thigh muscles), erector spinae (muscles along the spine), and glutes, helping to relieve tension in the legs, hips, and back.15",
+    "tags": [
+      "Flexibility",
+      "Stretching",
+      "Hamstrings",
+      "Calves",
+      "Hips",
+      "Back",
+      "Bodyweight."
+    ],
+    "progressions": [
+      "To deepen the stretch",
+      "the individual can move their chest farther toward the floor.15"
+    ],
+    "regressions": [
+      "To make the stretch easier",
+      "limit how far the chest moves toward the floor.15"
+    ],
+    "contraindications": [
+      "Individuals with acute hamstring injuries or significant lower back pain should exercise caution",
+      "especially if the stretch exacerbates discomfort.15"
+    ],
+    "cues": [
+      "\"Stand with feet closer than shoulder-width.\" \"Step forward with your left foot\" and \"flex the left foot up towards you.\" \"Bend at the hips and place your hands on your thigh.\" \"Keep the left leg straight as you slightly bend the right knee.\" \"Feel the stretch along your left hamstring\".62"
+    ],
+    "equipment": [
+      "None (bodyweight).62"
+    ],
+    "pattern": "core",
+    "discipline": "flexibility",
+    "primary_muscles": [
+      "hamstrings",
+      "gastrocnemius"
+    ],
+    "secondary_muscles": [
+      "latissimus_dorsi"
+    ]
+  },
+  {
+    "name": "Lying Quadriceps Stretch",
+    "category": "Flexibility",
+    "description": "The lying quadriceps stretch is performed while lying on one side or face down, by grasping the foot and pulling the heel towards the glute. This action effectively stretches the quadriceps (thigh) muscles, improving flexibility and range of motion in the knee and hip joints.63",
+    "tags": [
+      "Flexibility",
+      "Stretching",
+      "Quadriceps",
+      "Hips",
+      "Knees",
+      "Bodyweight."
+    ],
+    "progressions": [
+      "To increase the intensity",
+      "one can point the knee behind the body while continuing to hold the foot. Another option is to hold the stretch for 10-15 seconds",
+      "then push the foot into the hand for 5-7 seconds",
+      "relax",
+      "and pull the heel closer.63"
+    ],
+    "regressions": [
+      "A reduced pull on the foot or less knee bend can make the stretch more gentle."
+    ],
+    "contraindications": [
+      "Individuals with acute knee injuries or hip pain should avoid this stretch or perform it with extreme caution.63"
+    ],
+    "cues": [
+      "\"Lie on your right side on a mat/floor with your legs extended.\" \"Bend your left knee and pull your left heel up towards your left glute muscle,\" using your left hand to grasp the top of your left foot. \"Keep your hips and shoulders aligned vertically to the floor\" and \"your head aligned with your spine.\" \"Stiffen your core and abdominal muscles\" to stabilize the spine and pelvis. \"Gently pull your left heel and lower leg towards your tailbone\" while keeping the \"left thigh and knee resting on the inside of the right thigh\".63"
+    ],
+    "equipment": [
+      "Mat/Floor.63"
+    ],
+    "pattern": "core",
+    "discipline": "flexibility"
+  },
+  {
+    "name": "Standing Calf Stretch",
+    "category": "Flexibility",
+    "description": "The standing calf stretch is a two-part flexibility exercise designed to target both heads of the calf muscle: the gastrocnemius (stretched with a straight back leg) and the soleus (stretched with a slightly bent back knee). It is typically performed facing a wall, stepping back with one leg, and leaning forward to feel the stretch through the calf.65",
+    "tags": [
+      "Flexibility",
+      "Stretching",
+      "Calves",
+      "Ankles",
+      "Bodyweight."
+    ],
+    "progressions": [
+      "To deepen the stretch",
+      "one can bring the body closer to the wall",
+      "increase the bend in the front knee",
+      "or slightly flex the back knee to specifically target the soleus.65"
+    ],
+    "regressions": [
+      "Less lean towards the wall or a smaller bend in the front knee can reduce the intensity of the stretch."
+    ],
+    "contraindications": [
+      "Individuals with acute calf injuries or Achilles tendon issues should avoid this stretch or seek professional guidance.65"
+    ],
+    "cues": [
+      "\"Stand facing a wall, arms length away, with feet hip-width apart.\" \"Extend your arms to place your palms on the wall.\" \"Brace your core\" and \"depress and retract your scapulae.\" \"Step back with your right leg into a split-stance position,\" keeping \"both feet flat on the floor\" and \"toes pointing forward.\" \"Increase the flexion (bend) in your left (front) knee\" while \"keeping the opposite leg straightened and pushing the heel into the floor\".65"
+    ],
+    "equipment": [
+      "Wall.65"
+    ],
+    "pattern": "core",
+    "discipline": "flexibility",
+    "primary_muscles": [
+      "gastrocnemius"
+    ]
+  },
+  {
+    "name": "Overhead Triceps Stretch",
+    "category": "Flexibility",
+    "description": "The overhead triceps stretch is a simple flexibility exercise that targets the triceps muscles (on the back of the upper arm) and the shoulders. It is performed by extending one arm overhead, bending the elbow to allow the hand to drop to the middle of the back, and then using the other hand to gently apply pressure to the elbow to deepen the stretch.67",
+    "tags": [
+      "Flexibility",
+      "Stretching",
+      "Triceps",
+      "Shoulders",
+      "Arms",
+      "Bodyweight."
+    ],
+    "progressions": [
+      "Applying gentle",
+      "controlled pressure to the elbow with the opposing hand can deepen the stretch.67"
+    ],
+    "regressions": [
+      "Reducing the pressure applied or limiting the range of motion can make the stretch more comfortable."
+    ],
+    "contraindications": [
+      "Individuals with acute shoulder injuries or elbow pain should avoid this stretch or perform it with extreme caution and professional guidance.67"
+    ],
+    "cues": [
+      "\"Stand with feet hip-width apart\" and \"roll your shoulders down and back.\" \"Reach your right arm to the ceiling,\" keeping the shoulder down. \"Bending at the elbow, let your right hand drop to the middle of your back, palm facing your back.\" \"Reach your left hand to the ceiling and place your fingers on your right arm, just above the elbow, applying light pressure to deepen the stretch\".67"
+    ],
+    "equipment": [
+      "None (bodyweight).67"
+    ],
+    "pattern": "core",
+    "discipline": "flexibility",
+    "primary_muscles": [
+      "triceps",
+      "deltoids"
+    ]
+  },
+  {
+    "name": "Doorway Chest Stretch",
+    "category": "Flexibility",
+    "description": "The doorway chest stretch is a flexibility exercise performed in an open doorway, designed to alleviate tension and improve flexibility in the chest (pectoralis major and minor) and shoulders. It involves placing the forearms on the doorframe and gently leaning forward through the doorway.69 This stretch is particularly beneficial for individuals who spend long hours at a desk, weightlifters, or those with tight muscles due to poor posture or repetitive activities, as it helps counteract hunching and improve spinal alignment.70",
+    "tags": [
+      "Flexibility",
+      "Stretching",
+      "Chest",
+      "Shoulders",
+      "Posture",
+      "Bodyweight."
+    ],
+    "progressions": [
+      "To deepen the stretch",
+      "one can slowly step forward with one foot through the doorway or increase the lean.69"
+    ],
+    "regressions": [
+      "If the stretch is too intense",
+      "the elbows can be moved down slightly",
+      "or the lean can be reduced.69"
+    ],
+    "contraindications": [
+      "Individuals should avoid excessively arching the lower back. Those with existing shoulder injuries or intense neck pain should consult a professional",
+      "as this stretch could exacerbate certain conditions.70"
+    ],
+    "cues": [
+      "\"Stand in a doorway with your elbows bent at shoulder height and your forearms resting on the doorframe.\" \"Keeping your forearms and palms flat on the doorframe, gently lean through the doorway.\" \"Keep your chest up and your head facing forward.\" \"Ensure both arms are at right angles with your palms facing forward.\" \"Avoid using jerky or sudden movements\" and \"maintain a rhythmic breathing pattern\".69"
+    ],
+    "equipment": [
+      "Doorway.69"
+    ],
+    "pattern": "core",
+    "discipline": "flexibility",
+    "primary_muscles": [
+      "pectorals",
+      "deltoids"
+    ]
+  },
+  {
+    "name": "Figure Four Stretch",
+    "category": "Flexibility",
+    "description": "The figure four stretch is a versatile flexibility exercise performed either lying on the back or seated. It involves crossing one ankle over the opposite knee and gently pulling the leg toward the chest. This stretch is highly effective for easing tightness and tension in the hips and lower back, specifically targeting the glutes (particularly the gluteus medius) and the piriformis muscle. It can significantly help in relieving back pain and improving sciatica symptoms by increasing mobility in the hip joints.16",
+    "tags": [
+      "Flexibility",
+      "Stretching",
+      "Hips",
+      "Glutes",
+      "Lower Back",
+      "Sciatica",
+      "Bodyweight."
+    ],
+    "progressions": [
+      "To deepen the stretch",
+      "one can use one hand to gently apply additional pressure to the raised knee as it is pulled toward the chest.16"
+    ],
+    "regressions": [
+      "To make the stretch easier",
+      "after placing the ankle on the opposite knee",
+      "the heel can be slid closer to the butt while the foot remains on the floor",
+      "reducing the intensity of the pull.16"
+    ],
+    "contraindications": [
+      "Individuals with acute hip or knee injuries",
+      "or severe sciatica that is aggravated by the stretch",
+      "should avoid or modify this exercise.16"
+    ],
+    "cues": [
+      "\"Lie on your back (or sit) with your knees bent and feet flat on the floor.\" \"Bend one leg and place your ankle on your opposite knee.\" \"Grasp the back of your thigh or the front of your knee (of the leg on the floor) and gently pull your knee toward you.\" \"Feel a stretch in your hip muscles and the back of your leg\".16"
+    ],
+    "equipment": [
+      "Yoga Mat/Floor.16"
+    ],
+    "pattern": "core",
+    "discipline": "flexibility",
+    "primary_muscles": [
+      "glutes",
+      "latissimus_dorsi"
+    ]
+  },
+  {
+    "name": "Seated Spinal Twist",
+    "category": "Flexibility",
+    "description": "The seated spinal twist is a yoga posture that involves rotating the upper torso, providing numerous benefits for spinal health and internal organs. It stimulates abdominal organs (including the liver and kidneys), lengthens the spine, stretches the outer hips, and opens the shoulders. This twist helps maintain optimal spinal health and can relieve mild backache and hip pain.72",
+    "tags": [
+      "Yoga",
+      "Flexibility",
+      "Twist",
+      "Spine",
+      "Hips",
+      "Shoulders",
+      "Core",
+      "Mind-Body."
+    ],
+    "progressions": [
+      "To deepen the pose",
+      "one can interlace the hands for a bind or focus on twisting more deeply with each exhalation.73"
+    ],
+    "regressions": [
+      "For a more accessible version",
+      "instead of hooking the elbow",
+      "one can simply hug the thigh. If there is low back or hip discomfort",
+      "extending the bottom leg can alleviate strain.73"
+    ],
+    "contraindications": [
+      "Individuals experiencing lower back pain",
+      "hip pain or injuries",
+      "or shoulder pain should approach this pose with caution or modify it as needed.73"
+    ],
+    "cues": [
+      "\"From a seated position, take your right foot up and over to your left, so your foot is pressing down on the outside of your left thigh.\" \"Take your right fingertips behind you with palms or fingertips on the mat (or a block) to help keep your spine lifting and upright.\" \"Inhale, press your hips down to lengthen your heart and entire spine upwards and lift your left arm up.\" \"Exhale, hook your left elbow to the outside of your right thigh.\" \"With each inhale, lengthen your spine more, and with each exhale, twist more deeply.\" \"Keep your ribcage lifted and heart open,\" and \"the gaze follows the spine as it twists open\".73"
+    ],
+    "equipment": [
+      "Yoga Mat",
+      "Optional: Block.73"
+    ],
+    "pattern": "core",
+    "discipline": "flexibility",
+    "primary_muscles": [
+      "deltoids",
+      "core"
+    ]
+  }
+]

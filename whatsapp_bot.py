@@ -9,12 +9,15 @@ import json
 import logging
 import requests
 from datetime import datetime, timedelta
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from flask import Flask, request, jsonify
+from dotenv import load_dotenv
+load_dotenv()
 from coach_core.ai import AICoach
 from coach_core.data import load_profile, load_logs, save_logs
 from coach_core.user_memory import user_memory_db
 import openai
+from pathlib import Path
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -37,7 +40,8 @@ EXTRACTION_KEYS = [
     "intentions", "lifestyle", "milestones"
 ]
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Initialize OpenAI client (new API)
+openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def load_whatsapp_interactions() -> List[Dict[str, Any]]:
     """Load WhatsApp interactions from file"""
@@ -90,13 +94,17 @@ def ai_extract_info(user_message):
         "If a category is not present, return null for that key.\n"
         f"Message: '{user_message}'"
     )
-    response = openai.ChatCompletion.create(
+    response = openai_client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         temperature=0
     )
     try:
-        extracted = json.loads(response['choices'][0]['message']['content'])
+        content = response.choices[0].message.content
+        if content is not None:
+            extracted = json.loads(content)
+        else:
+            extracted = {key: None for key in EXTRACTION_KEYS}
     except Exception as e:
         logger.error(f"Error parsing extraction JSON: {e}")
         extracted = {key: None for key in EXTRACTION_KEYS}
@@ -128,6 +136,149 @@ def update_database(user_id, user_message, ai_response, extracted_info):
             
     except Exception as e:
         logger.error(f"❌ Error updating database: {e}")
+
+def download_whatsapp_image(media_id: str) -> Optional[bytes]:
+    """Download image from WhatsApp API using media_id"""
+    try:
+        # Step 1: Get the media URL
+        url = f"https://graph.facebook.com/v18.0/{media_id}"
+        headers = {'Authorization': f'Bearer {WHATSAPP_API_TOKEN}'}
+        
+        response = requests.get(url, headers=headers)
+        if response.status_code != 200:
+            logger.error(f"❌ Failed to get media URL: {response.status_code}")
+            return None
+            
+        media_data = response.json()
+        media_url = media_data.get('url')
+        
+        if not media_url:
+            logger.error("❌ No media URL in response")
+            return None
+        
+        # Step 2: Download the actual image
+        image_response = requests.get(media_url, headers=headers)
+        if image_response.status_code != 200:
+            logger.error(f"❌ Failed to download image: {image_response.status_code}")
+            return None
+            
+        return image_response.content
+        
+    except Exception as e:
+        logger.error(f"❌ Error downloading image: {e}")
+        return None
+
+def save_training_image(user_id: str, image_data: bytes, caption: str = "") -> Optional[str]:
+    """Save training image to disk and return file path"""
+    try:
+        # Create training_images directory if it doesn't exist
+        training_dir = Path("training_images")
+        training_dir.mkdir(exist_ok=True)
+        
+        # Create user-specific subdirectory
+        user_dir = training_dir / user_id
+        user_dir.mkdir(exist_ok=True)
+        
+        # Generate filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"training_{timestamp}.jpg"
+        filepath = user_dir / filename
+        
+        # Save the image
+        with open(filepath, 'wb') as f:
+            f.write(image_data)
+        
+        logger.info(f"✅ Saved training image: {filepath}")
+        return str(filepath)
+        
+    except Exception as e:
+        logger.error(f"❌ Error saving training image: {e}")
+        return None
+
+def handle_training_image(message: Dict[str, Any], user_id: str):
+    """Handle incoming training image from WhatsApp"""
+    try:
+        # Extract image data from WhatsApp message
+        image_data = message.get('image', {})
+        media_id = image_data.get('id')
+        caption = image_data.get('caption', '')
+        mime_type = image_data.get('mime_type', 'image/jpeg')
+        
+        if not media_id:
+            logger.error("❌ No media_id in image message")
+            send_whatsapp_message(user_id, "Sorry, I couldn't process that image. Please try again.")
+            return
+        
+        logger.info(f"📸 Processing training image from {user_id}")
+        logger.info(f"📝 Caption: {caption}")
+        
+        # Download the image
+        image_bytes = download_whatsapp_image(media_id)
+        if not image_bytes:
+            send_whatsapp_message(user_id, "Sorry, I couldn't download your training image. Please try again.")
+            return
+        
+        # Save the image
+        image_path = save_training_image(user_id, image_bytes, caption)
+        if not image_path:
+            send_whatsapp_message(user_id, "Sorry, I couldn't save your training image. Please try again.")
+            return
+        
+        # Create training log entry
+        training_log = {
+            "type": "training_image",
+            "image_path": image_path,
+            "caption": caption,
+            "timestamp": datetime.now().isoformat(),
+            "mime_type": mime_type
+        }
+        
+        # Store in database
+        success = user_memory_db.store_training_image(user_id, training_log)
+        
+        if success:
+            # Generate AI response about the training image
+            ai_response = generate_training_image_response(caption, user_id)
+            send_whatsapp_message(user_id, ai_response)
+            logger.info(f"✅ Training image logged for {user_id}")
+        else:
+            send_whatsapp_message(user_id, "I saved your training image but had trouble logging it. Your progress is still recorded!")
+            
+    except Exception as e:
+        logger.error(f"❌ Error handling training image: {e}")
+        send_whatsapp_message(user_id, "Sorry, I encountered an error processing your training image. Please try again.")
+
+def generate_training_image_response(caption: str, user_id: str) -> str:
+    """Generate AI response for training image"""
+    try:
+        # Get user context for personalized response
+        user_profile = user_memory_db.get_user_profile(user_id)
+        recent_interactions = user_memory_db.get_user_recent_interactions(user_id, limit=5)
+        
+        context = f"User sent a training image with caption: '{caption}'. "
+        if user_profile:
+            context += f"User goals: {user_profile.get('current_goals', 'Not specified')}. "
+        
+        prompt = (
+            f"{context}\n\n"
+            "This is a training image from a WhatsApp fitness coaching session. "
+            "Provide a brief, encouraging response that acknowledges their training effort. "
+            "Keep it under 100 words and focus on motivation and progress tracking."
+        )
+        
+        response = openai_client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=150
+        )
+        
+        content = response.choices[0].message.content
+        return content if content else "Great training! Keep up the excellent work! 💪"
+        
+    except Exception as e:
+        logger.error(f"❌ Error generating training image response: {e}")
+        return "Great training! I've logged your progress. Keep pushing forward! 💪"
 
 class WhatsAppCoach:
     """WhatsApp AI Fitness Coach"""
@@ -211,29 +362,39 @@ def handle_webhook():
                 if 'value' in change and 'messages' in change['value']:
                     message = change['value']['messages'][0]
                     user_id = message['from']
-                    user_message = message['text']['body']
+                    
+                    # Handle different message types
+                    if message.get('type') == 'text':
+                        user_message = message['text']['body']
+                        
+                        # 1. Log raw message
+                        log_raw_message(user_id, user_message)
 
-                    # 1. Log raw message
-                    log_raw_message(user_id, user_message)
+                        # 2. Extract info using OpenAI
+                        extracted_info = ai_extract_info(user_message)
 
-                    # 2. Extract info using OpenAI
-                    extracted_info = ai_extract_info(user_message)
+                        # 3. Log extracted info
+                        log_extracted_info(user_id, extracted_info)
 
-                    # 3. Log extracted info
-                    log_extracted_info(user_id, extracted_info)
+                        # 4. Get AI response (existing logic)
+                        ai_response = whatsapp_coach.handle_message(user_message, user_id)
 
-                    # 4. Get AI response (existing logic)
-                    ai_response = whatsapp_coach.handle_message(user_message, user_id)
+                        # 5. Update database with all information
+                        update_database(user_id, user_message, ai_response, extracted_info)
 
-                    # 5. Update database with all information
-                    update_database(user_id, user_message, ai_response, extracted_info)
+                        # Send response back via WhatsApp API
+                        if send_whatsapp_message(user_id, ai_response):
+                            logger.info(f"✅ User {user_id}: {user_message}")
+                            logger.info(f"✅ AI Response sent: {ai_response}")
+                        else:
+                            logger.error(f"❌ Failed to send response to {user_id}")
 
-                    # Send response back via WhatsApp API
-                    if send_whatsapp_message(user_id, ai_response):
-                        logger.info(f"✅ User {user_id}: {user_message}")
-                        logger.info(f"✅ AI Response sent: {ai_response}")
+                    elif message.get('type') == 'image':
+                        # Handle image message for training logs
+                        handle_training_image(message, user_id)
+                        
                     else:
-                        logger.error(f"❌ Failed to send response to {user_id}")
+                        logger.info(f"Received unsupported message type: {message.get('type')}")
 
                     return jsonify({'status': 'success'})
 
