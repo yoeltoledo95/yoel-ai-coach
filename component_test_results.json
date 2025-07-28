@@ -1,0 +1,33 @@
+{
+  "summary": {
+    "passed": 3,
+    "total": 6,
+    "success_rate": 50.0
+  },
+  "results": [
+    {
+      "test": "Exercise Library",
+      "passed": false
+    },
+    {
+      "test": "Mentor Knowledge",
+      "passed": true
+    },
+    {
+      "test": "RAG System",
+      "passed": true
+    },
+    {
+      "test": "Prompt Engine",
+      "passed": true
+    },
+    {
+      "test": "Database",
+      "passed": false
+    },
+    {
+      "test": "Container",
+      "passed": false
+    }
+  ]
+}

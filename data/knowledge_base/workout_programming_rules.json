@@ -1,0 +1,106 @@
+{
+  "workout_programming_rules": {
+    "muscle_hypertrophy": {
+      "volume": "10–20+ sets per muscle group per week",
+      "intensity": "60–85% 1RM, within 1–3 reps of muscular failure",
+      "frequency": "2–3x/week per muscle group",
+      "programming": {
+        "reps": "6–12 reps/set",
+        "sets": "3–5 sets/exercise",
+        "progression": "Increase sets, reps, or load linearly"
+      },
+      "exercises": "Compound lifts (squat, bench, deadlift, row, overhead press) plus isolation",
+      "techniques": "Progressive overload, drop sets, supersets for advanced trainees",
+      "split": "Upper/lower, push/pull/legs, or full body",
+      "recovery": "48h between sessions for a muscle group"
+    },
+    "flexibility_range_of_motion": {
+      "methods": [
+        "Dynamic stretching (before workouts)",
+        "Static stretching (post-workout)",
+        "Active stretching and foam rolling",
+        "Yoga/Pilates",
+        "Mobility exercises (leg swings, arm circles, lunges, hip openers)"
+      ],
+      "frequency": "5–7x/week for flexibility, 2–3x/week minimum for gains",
+      "intensity": "Hold static stretches 15–60s, 2–4 sets per area",
+      "programming": "Add stretching at end of workouts, dedicate one session per week to mobility/flexibility",
+      "balance": "Target opposing muscle groups for symmetrical flexibility",
+      "recovery": "Foam rolling and gentle stretching on rest days"
+    },
+    "movement_quality_complexity": {
+      "philosophy": "Train movement, not just muscles (Isolation → Integration → Improvisation)",
+      "focus": "Body control, coordination, and adaptability",
+      "techniques": [
+        "Locomotion drills (bear crawl, crab walk)",
+        "Flow sequences",
+        "Animal walks",
+        "Hand balancing",
+        "Hanging",
+        "Advanced bodyweight patterns"
+      ],
+      "programming": [
+        "Practice isolated skills first",
+        "Integrate skills into complex flows",
+        "Regularly improvise and play with movement"
+      ],
+      "frequency": "3–5x/week, often as warm-up/cool-down or standalone",
+      "intensity": "Moderate—emphasize quality, not quantity",
+      "movement_snacks": "Short, frequent mobility bursts multiple times/day",
+      "progression": "Increase complexity (degrees of freedom), not just sets/reps"
+    },
+    "joint_health_prehab_rehab": {
+      "exercises": [
+        "Compound joint-friendly moves: Squat, step-up, row, shoulder press, leg extension",
+        "Stability/balance drills (bosu ball, balance board)",
+        "Prehab movements: reverse sled drag, tibialis raises"
+      ],
+      "programming": {
+        "frequency": "1–2x/week as dedicated session or sprinkled after main workouts",
+        "duration": "30–60s per exercise, 2–3 rounds/week"
+      },
+      "focus": "Corrective exercise, slow eccentrics, isometrics, controlled mobility work",
+      "recovery": "Balance and agility work, water-based activity or gentle cardio for off days"
+    },
+    "vitality_longevity_balance": {
+      "principles": [
+        "Combine strength, cardio, balance, flexibility, and mobility",
+        "Use full-body compound movements",
+        "Prioritize cardiovascular health, balance, and bone density"
+      ],
+      "frequency": "Most days of the week (4–6x) with varied intensity",
+      "intensity": "Moderate (RPE 5–7/10), avoid high impact unless proficient",
+      "programming": "Moderate-high frequency, low-intermediate intensity",
+      "recovery": "Emphasize sleep, stress management, walking, and hydration"
+    },
+    "mobility_recovery_practices": {
+      "routine": [
+        "Include 1–3 mobility movements within every workout",
+        "Add full mobility sessions 1–2x/week"
+      ],
+      "techniques": [
+        "Flow-based drills",
+        "Joint articulations",
+        "Controlled Articular Rotations (CARs)",
+        "Passive and active stretching"
+      ],
+      "active_recovery": "Walking, cycling, swimming, or yoga for off days",
+      "frequency": "Minimum 2–3x/week, daily is better"
+    },
+    "weekly_plan_template": {
+      "monday": "Strength (Hypertrophy) + Mobility",
+      "tuesday": "Movement Quality/Complexity + Cardio",
+      "wednesday": "Joint Health/Prehab + Recovery Mobility",
+      "thursday": "Strength (Hypertrophy) + Flexibility",
+      "friday": "Movement Complexity + Cardio/Balance",
+      "saturday": "Full-Body Longevity/Mobility Session",
+      "sunday": "Active Recovery (walk, stretch, foam roll)"
+    },
+    "key_principles": [
+      "Rotate focus areas, but integrate mobility and movement quality daily",
+      "Use movement snacks—short, frequent mobility bursts—especially for sedentary individuals",
+      "Prioritize weakest areas early in the week",
+      "Always individualize: progression, regression, and rest based on age, training status, past injury, and preferences"
+    ]
+  }
+} 
