@@ -866,7 +866,8 @@ Generate a natural, helpful response that addresses their message appropriately.
         if any(keyword in user_input_lower for keyword in [
             "change goal", "update goal", "new goal", "different goal", 
             "set new goals", "want to set", "update my goals", "change my goals",
-            "new goals", "different goals", "modify goals"
+            "new goals", "different goals", "modify goals", "write new goals",
+            "set goals", "update goals", "change goals"
         ]):
             # Extract goals from user input using more sophisticated parsing
             goals = self._extract_goals_from_input(user_input)
@@ -944,6 +945,8 @@ Generate a natural, helpful response that addresses their message appropriately.
         user_input_lower = user_input.lower()
         goals = []
         
+        logger.info(f"Extracting goals from input: {user_input}")
+        
         # Basic fitness goals
         goal_mappings = {
             "strength": ["strength", "strong", "muscle", "power"],
@@ -981,7 +984,7 @@ Generate a natural, helpful response that addresses their message appropriately.
                 goals.append(skill)
         
         # Check for training frequency goals
-        if any(freq in user_input_lower for freq in ["6 times", "6 days", "6x", "six times", "six days"]):
+        if any(freq in user_input_lower for freq in ["6 times", "6 days", "6x", "six times", "six days", "workout 6"]):
             goals.append("high_frequency_training")
         
         if any(freq in user_input_lower for freq in ["5 times", "5 days", "5x", "five times", "five days"]):
@@ -1007,4 +1010,5 @@ Generate a natural, helpful response that addresses their message appropriately.
                 seen.add(goal)
                 unique_goals.append(goal)
         
+        logger.info(f"Extracted goals: {unique_goals}")
         return unique_goals 

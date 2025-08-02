@@ -172,7 +172,7 @@ OPENAI_MODEL=gpt-4o
 
 # WhatsApp Configuration (for production)
 WHATSAPP_API_TOKEN=your_whatsapp_token_here
-WHATSAPP_PHONE_NUMBER_ID=your_phone_number_id_here
+WHATSAPP_BUSINESS_ID=your_business_id_here
 WHATSAPP_WEBHOOK_SECRET=your_webhook_secret_here
 
 # Environment

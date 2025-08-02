@@ -128,10 +128,18 @@ class WhatsAppClient:
     def process_webhook_message(self, message_data: Dict[str, Any]) -> Dict[str, Any]:
         """Process incoming webhook message"""
         try:
+            # Debug: Log the entire webhook payload
+            logger.info(f"🔍 Raw webhook payload: {message_data}")
+            
             # Extract message information
             entry = message_data.get("entry", [{}])[0]
+            logger.info(f"🔍 Entry: {entry}")
+            
             changes = entry.get("changes", [{}])[0]
+            logger.info(f"🔍 Changes: {changes}")
+            
             value = changes.get("value", {})
+            logger.info(f"🔍 Value: {value}")
             
             # Check if this is a status update (not a user message)
             if "statuses" in value:
@@ -140,12 +148,15 @@ class WhatsAppClient:
             
             # Check if this is a message
             messages = value.get("messages", [])
+            logger.info(f"🔍 Messages: {messages}")
             
             if not messages:
                 logger.debug("No user messages found in webhook")
                 return {"error": "No messages found in webhook"}
             
             message = messages[0]
+            logger.info(f"🔍 Individual message: {message}")
+            
             message_type = message.get("type", "text")
             
             # Only process text messages for now
@@ -162,10 +173,21 @@ class WhatsAppClient:
                 logger.debug("Empty text message")
                 return {"error": "Empty message content"}
             
-            logger.info(f"Processing message from {message.get('from')}: {text_content[:50]}...")
+            # Extract user ID - try different possible fields
+            user_id = message.get("from")
+            if not user_id:
+                # Try alternative fields that might contain the user ID
+                user_id = message.get("sender", {}).get("id") if isinstance(message.get("sender"), dict) else None
+                if not user_id:
+                    user_id = message.get("author", {}).get("id") if isinstance(message.get("author"), dict) else None
+                if not user_id:
+                    user_id = message.get("contact", {}).get("wa_id") if isinstance(message.get("contact"), dict) else None
+            
+            logger.info(f"🔍 Extracted user_id: {user_id}")
+            logger.info(f"Processing message from {user_id}: {text_content[:50]}...")
             
             return {
-                "user_id": message.get("from"),
+                "user_id": user_id,
                 "message_type": message_type,
                 "timestamp": message.get("timestamp"),
                 "text": text_content,

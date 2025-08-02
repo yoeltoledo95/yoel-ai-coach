@@ -30,6 +30,7 @@ class WhatsAppConfig:
     """WhatsApp configuration"""
     api_token: Optional[str] = None
     phone_number_id: Optional[str] = None
+    business_id: Optional[str] = None
     api_url: Optional[str] = None
     webhook_secret: Optional[str] = None
 
@@ -67,6 +68,7 @@ class AppConfig:
         # WhatsApp
         self.whatsapp.api_token = os.getenv("WHATSAPP_API_TOKEN")
         self.whatsapp.phone_number_id = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
+        self.whatsapp.business_id = os.getenv("WHATSAPP_BUSINESS_ID")
         self.whatsapp.webhook_secret = os.getenv("WHATSAPP_VERIFY_TOKEN")
         
         # Environment
