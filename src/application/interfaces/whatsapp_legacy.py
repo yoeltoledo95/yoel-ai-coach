@@ -27,8 +27,8 @@ app = Flask(__name__)
 
 # WhatsApp API Configuration
 WHATSAPP_API_TOKEN = os.getenv('WHATSAPP_API_TOKEN')
-WHATSAPP_PHONE_NUMBER_ID = os.getenv('WHATSAPP_PHONE_NUMBER_ID', '')  # Add your phone number ID here
-WHATSAPP_API_URL = f"https://graph.facebook.com/v18.0/{WHATSAPP_PHONE_NUMBER_ID}/messages"
+WHATSAPP_BUSINESS_ID = os.getenv('WHATSAPP_BUSINESS_ID', '')  # Add your business ID here
+WHATSAPP_API_URL = f"https://graph.facebook.com/v18.0/{WHATSAPP_BUSINESS_ID}/messages"
 
 # WhatsApp interactions file
 WHATSAPP_INTERACTIONS_FILE = "whatsapp_interactions.json"
@@ -412,7 +412,7 @@ def health_check():
         'version': '2.0',
         'timestamp': datetime.now().isoformat(),
         'whatsapp_token_configured': bool(WHATSAPP_API_TOKEN),
-        'phone_number_id_configured': bool(WHATSAPP_PHONE_NUMBER_ID)
+        'business_id_configured': bool(WHATSAPP_BUSINESS_ID)
     })
 
 if __name__ == '__main__':
@@ -425,7 +425,7 @@ if __name__ == '__main__':
     else:
         logger.warning("⚠️ WhatsApp API token not configured")
     
-    if WHATSAPP_PHONE_NUMBER_ID:
+    if WHATSAPP_BUSINESS_ID:
         logger.info("✅ WhatsApp Phone Number ID configured")
     else:
         logger.warning("⚠️ WhatsApp Phone Number ID not configured")

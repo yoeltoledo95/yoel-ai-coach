@@ -23,6 +23,7 @@ def setup_environment():
             print("   - OPENAI_API_KEY")
             print("   - WHATSAPP_API_TOKEN (if using WhatsApp)")
             print("   - WHATSAPP_PHONE_NUMBER_ID (if using WhatsApp)")
+            print("   - WHATSAPP_VERIFY_TOKEN (if using WhatsApp)")
         else:
             print("❌ env.template not found")
             return False

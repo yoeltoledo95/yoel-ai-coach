@@ -93,19 +93,21 @@ yoel_ai_coach/
 - WhatsApp Business API credentials
 
 ### **Environment Variables**
-```bash
-# Required
-OPENAI_API_KEY=your_openai_api_key
 
-# WhatsApp (for production)
-WHATSAPP_API_TOKEN=your_whatsapp_token
-WHATSAPP_PHONE_NUMBER_ID=your_phone_number_id
-WHATSAPP_WEBHOOK_SECRET=your_webhook_secret
+Create a `.env` file in the root directory with the following variables:
+
+```bash
+# OpenAI
+OPENAI_API_KEY=your_openai_api_key_here
+
+# WhatsApp Cloud API
+WHATSAPP_API_TOKEN=your_whatsapp_api_token_here
+WHATSAPP_PHONE_NUMBER_ID=your_phone_number_id_here
+WHATSAPP_VERIFY_TOKEN=your_webhook_verify_token_here
 
 # Optional
 ENVIRONMENT=development
 DEBUG=true
-OPENAI_MODEL=gpt-4o
 ```
 
 ### **Installation**
