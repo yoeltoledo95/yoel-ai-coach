@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Fitness Coach</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 500px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .chat-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .chat-header p {
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+        
+        .message.user {
+            background: #007AFF;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.bot {
+            background: #F2F2F7;
+            color: #1C1C1E;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .chat-input {
+            padding: 20px;
+            border-top: 1px solid #E5E5EA;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #E5E5EA;
+            border-radius: 20px;
+            font-size: 16px;
+            outline: none;
+        }
+        
+        .chat-input input:focus {
+            border-color: #007AFF;
+        }
+        
+        .chat-input button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .chat-input button:hover {
+            background: #0056CC;
+        }
+        
+        .chat-input button:disabled {
+            background: #C7C7CC;
+            cursor: not-allowed;
+        }
+        
+        .typing {
+            display: none;
+            align-self: flex-start;
+            background: #F2F2F7;
+            color: #1C1C1E;
+            padding: 12px 16px;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .typing::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            color: #8E8E93;
+        }
+        
+        .status.connected {
+            color: #34C759;
+        }
+        
+        .status.error {
+            color: #FF3B30;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>🤖 AI Fitness Coach</h1>
+            <p>Your personal fitness companion</p>
+        </div>
+        
+        <div class="chat-messages" id="messages">
+            <div class="message bot">
+                Hi! I'm your AI fitness coach. I can help you with workout plans, exercise form, nutrition advice, and more. What would you like to work on today?
+            </div>
+        </div>
+        
+        <div class="typing" id="typing">AI Coach is typing</div>
+        
+        <div class="chat-input">
+            <input type="text" id="messageInput" placeholder="Type your message..." autocomplete="off">
+            <button id="sendButton">Send</button>
+        </div>
+        
+        <div class="status" id="status">Connected</div>
+    </div>
+
+    <script>
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typing');
+        const statusElement = document.getElementById('status');
+        
+        let isProcessing = false;
+        
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            messageDiv.textContent = content;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function showTyping() {
+            typingIndicator.style.display = 'block';
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+        }
+        
+        function setStatus(message, type = '') {
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`;
+        }
+        
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message || isProcessing) return;
+            
+            // Add user message
+            addMessage(message, true);
+            messageInput.value = '';
+            
+            // Show typing indicator
+            showTyping();
+            isProcessing = true;
+            sendButton.disabled = true;
+            
+            try {
+                setStatus('Sending message...');
+                
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        user_id: 'web_user'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Hide typing and add bot response
+                hideTyping();
+                addMessage(data.response);
+                setStatus('Connected', 'connected');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                hideTyping();
+                addMessage('Sorry, I encountered an error. Please try again.');
+                setStatus('Error: ' + error.message, 'error');
+            } finally {
+                isProcessing = false;
+                sendButton.disabled = false;
+                messageInput.focus();
+            }
+        }
+        
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Focus input on load
+        messageInput.focus();
+        
+        // Check health on load
+        fetch('/api/health')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'healthy') {
+                    setStatus('Connected', 'connected');
+                } else {
+                    setStatus('Service unavailable', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Health check failed:', error);
+                setStatus('Connection error', 'error');
+            });
+    </script>
+</body>
+</html>

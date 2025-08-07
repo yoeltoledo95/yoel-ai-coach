@@ -77,22 +77,34 @@ class OpenAIClient:
         """Extract structured information from text"""
         prompt = f"""
         Extract all relevant information from the following text.
-        Return a JSON object with these keys: {', '.join(extraction_keys)}.
+        Return ONLY a valid JSON object with these keys: {', '.join(extraction_keys)}.
         If a category is not present, return null for that key.
+        Do not include any additional text, only the JSON object.
         
         Text: "{text}"
+        
+        JSON Response:
         """
         
         messages = [
-            {"role": "system", "content": "You are a helpful assistant that extracts structured information from text."},
+            {"role": "system", "content": "You are a helpful assistant that extracts structured information from text. Always respond with valid JSON only."},
             {"role": "user", "content": prompt}
         ]
         
         try:
             response = self.generate_response(messages)
-            # Parse JSON response
+            # Clean response and parse JSON
             import json
-            return json.loads(response)
+            import re
+            
+            # Remove any non-JSON text before parsing
+            json_match = re.search(r'\{.*\}', response, re.DOTALL)
+            if json_match:
+                json_str = json_match.group()
+                return json.loads(json_str)
+            else:
+                logger.error(f"No JSON found in response: {response}")
+                return {key: None for key in extraction_keys}
         except Exception as e:
             logger.error(f"Error extracting information: {e}")
             return {key: None for key in extraction_keys}
@@ -100,24 +112,40 @@ class OpenAIClient:
     def analyze_sentiment(self, text: str) -> Dict[str, Any]:
         """Analyze sentiment and mood from text"""
         prompt = f"""
-        Analyze the sentiment and mood from this text. Return a JSON object with:
+        Analyze the sentiment and mood from this text. Return ONLY a valid JSON object with:
         - sentiment: positive, negative, or neutral
         - mood: specific mood (e.g., excited, tired, motivated, frustrated)
         - energy_level: 1-10 scale
         - confidence: 0-1 scale
         
         Text: "{text}"
+        
+        JSON Response:
         """
         
         messages = [
-            {"role": "system", "content": "You are a helpful assistant that analyzes sentiment and mood."},
+            {"role": "system", "content": "You are a helpful assistant that analyzes sentiment and mood. Always respond with valid JSON only."},
             {"role": "user", "content": prompt}
         ]
         
         try:
             response = self.generate_response(messages)
             import json
-            return json.loads(response)
+            import re
+            
+            # Remove any non-JSON text before parsing
+            json_match = re.search(r'\{.*\}', response, re.DOTALL)
+            if json_match:
+                json_str = json_match.group()
+                return json.loads(json_str)
+            else:
+                logger.error(f"No JSON found in sentiment response: {response}")
+                return {
+                    "sentiment": "neutral",
+                    "mood": "unknown",
+                    "energy_level": 5,
+                    "confidence": 0.5
+                }
         except Exception as e:
             logger.error(f"Error analyzing sentiment: {e}")
             return {
@@ -133,33 +161,226 @@ class OpenAIClient:
         context: Dict[str, Any]
     ) -> str:
         """Generate personalized coaching response"""
-        system_prompt = f"""
-        You are an AI fitness coach with expertise from world-class trainers.
-        Provide personalized, encouraging, and PRACTICAL advice.
         
-        IMPORTANT: Be VERY SPECIFIC and ACTIONABLE.
-        - Give exact exercises, sets, reps, and weights when applicable
-        - Provide specific form cues and technique details
-        - Include exact durations and rest periods
-        - Avoid vague suggestions like "do some mobility" or "quick warm-up"
+        # Debug: Log the context being used
+        logger.info(f"Generating coaching response with context keys: {list(context.keys())}")
+        logger.info(f"User profile in context: {context.get('user_profile', {})}")
+        logger.info(f"Mentor context in context: {context.get('mentor_context', '')[:100]}...")
         
-        User Context:
-        - Profile: {context.get('user_profile', {})}
-        - Recent Sessions: {context.get('recent_sessions', [])}
-        - Patterns: {context.get('patterns', {})}
-        - Mentor Context: {context.get('mentor_context', '')}
+        # Build dynamic system prompt based on context
+        system_prompt = self._build_dynamic_system_prompt(context)
         
-        Respond to: "{user_input}"
+        # Build user message with layered context
+        user_message = self._build_user_message(user_input, context)
         
-        Format guidelines:
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message}
+        ]
+        
+        return self.generate_response(messages)
+    
+    def _build_dynamic_system_prompt(self, context: Dict[str, Any]) -> str:
+        """Build dynamic system prompt based on context"""
+        
+        # Base coach personality
+        base_prompt = """You are an AI fitness coach with expertise from world-class trainers including Dylan Werner, Ido Portal, Tom Merrick, and others. Provide personalized, encouraging, and PRACTICAL advice."""
+        
+        # Add mentor-specific guidance
+        mentor_context = context.get('mentor_context', '')
+        if mentor_context:
+            base_prompt += f"""
+            
+            MENTOR KNOWLEDGE CONTEXT:
+            {mentor_context}
+            
+            CRITICAL: Use this mentor knowledge to provide specific, expert-level guidance. 
+            - Reference specific mentors by name (Dylan Werner, Ido Portal, Tom Merrick, etc.)
+            - Include their specific principles, methodologies, and cues
+            - Provide detailed exercise progressions and regressions
+            - Use their specific terminology and approaches
+            - Don't give generic advice - use the mentor expertise
+            - Include specific cues, progressions, and technical details from the mentors
+            """
+        
+        # Add conversation intent guidance
+        conversation_context = context.get('conversation_context', {})
+        if conversation_context.get('intent') == 'goal_setting':
+            base_prompt += """
+            
+            GOAL SETTING MODE:
+            - Help user set specific, measurable, achievable goals
+            - Consider their current level and preferences
+            - Provide clear progression paths
+            - Ask clarifying questions to understand their vision
+            - Reference their previous goals and progress
+            """
+        elif conversation_context.get('intent') == 'follow_up_question':
+            base_prompt += """
+            
+            FOLLOW-UP MODE:
+            - Provide detailed explanations for your recommendations
+            - Reference specific mentor principles and reasoning
+            - Explain the "why" behind your suggestions
+            - Connect to their personal context and goals
+            - Address their specific concerns or confusion
+            """
+        
+        # Add personalized guidance based on user profile
+        user_profile = context.get('user_profile', {})
+        if user_profile:
+            # Check if profile is incomplete (new user)
+            goals = user_profile.get('goals', [])
+            level = user_profile.get('level', 'Unknown')
+            age = user_profile.get('age')
+            
+            if not goals or level == 'beginner' or age is None:
+                base_prompt += f"""
+                
+                NEW USER PROFILE GATHERING:
+                - User name: {user_profile.get('name', 'User')}
+                - Profile is incomplete - need to gather real information
+                - Ask specific questions about their fitness goals, experience level, and preferences
+                - Don't assume anything - ask for their actual goals and experience
+                - If they mention they're not a beginner, update your understanding
+                - If they say goals are wrong, ask what their real goals are
+                - Be conversational and gather information naturally
+                """
+            else:
+                base_prompt += f"""
+                
+                PERSONALIZATION GUIDANCE:
+                - User name: {user_profile.get('name', 'User')}
+                - Current goals: {goals}
+                - Fitness level: {level}
+                - Injury considerations: {user_profile.get('injury_history', {})}
+                - Always reference their specific goals and level
+                - Consider their injury history when making recommendations
+                """
+        
+        # Add conversation memory guidance
+        user_memory = context.get('user_memory', {})
+        recent_conversations = user_memory.get('recent_conversations', [])
+        if recent_conversations:
+            base_prompt += """
+            
+            CONVERSATION MEMORY:
+            - Remember previous exchanges in this conversation
+            - Don't ask for information already provided
+            - Build on previous recommendations
+            - Reference specific exercises or techniques mentioned before
+            - Maintain consistency with earlier advice
+            - If the user has stated their goals in previous messages, use those goals
+            - If the user has provided specific fitness objectives, incorporate them into your responses
+            - Don't reset to generic menus if the user has already shared their goals
+            - When asked about goals, reference the user's saved goals from their profile
+            - If user asks "What are my goals?" or similar, list their actual saved goals
+            """
+        
+        # Add response guidelines
+        base_prompt += """
+        
+        RESPONSE GUIDELINES:
+        • Be VERY SPECIFIC and ACTIONABLE
+        • Give exact exercises, sets, reps, and weights when applicable
+        • Provide specific form cues and technique details
+        • Include exact durations and rest periods
         • Use short paragraphs (2-3 sentences max)
         • Use bullet points for specific exercises and sets
         • Use emojis sparingly but effectively
         • Keep it conversational and encouraging
-        • Focus on SPECIFIC, ACTIONABLE advice
-        • Include exact numbers: sets, reps, weights, durations
-        • Provide specific form cues and technique notes
+        • Reference mentor principles when relevant
+        • Connect to their personal context and goals
         """
+        
+        return base_prompt
+    
+    def _build_user_message(self, user_input: str, context: Dict[str, Any]) -> str:
+        """Build user message with layered context"""
+        
+        user_message = f"User message: {user_input}\n\n"
+        
+        # Add user profile context
+        user_profile = context.get('user_profile', {})
+        if user_profile:
+            user_message += f"USER PROFILE:\n"
+            user_message += f"- Name: {user_profile.get('name', 'User')}\n"
+            user_message += f"- Goals: {user_profile.get('goals', [])}\n"
+            user_message += f"- Level: {user_profile.get('level', 'Unknown')}\n"
+            user_message += f"- Training preferences: {user_profile.get('training_preferences', {})}\n"
+            user_message += f"- Injury history: {user_profile.get('injury_history', {})}\n"
+            user_message += f"- Age: {user_profile.get('age', 'Unknown')}\n\n"
+        
+        # Add recent patterns
+        patterns = context.get('patterns', {})
+        if patterns:
+            user_message += f"RECENT TRAINING PATTERNS:\n"
+            user_message += f"- Training frequency: {patterns.get('frequency', 'Unknown')} sessions/week\n"
+            user_message += f"- Average session duration: {patterns.get('avg_duration', 'Unknown')} minutes\n"
+            user_message += f"- Common intensity: {patterns.get('most_common_intensity', 'Unknown')}\n"
+            user_message += f"- Energy trends: {patterns.get('energy_trend', 'Unknown')}\n"
+            user_message += f"- Mood trends: {patterns.get('mood_trend', 'Unknown')}\n\n"
+        
+        # Add relevant exercises
+        exercise_context = context.get('exercise_context', {})
+        relevant_exercises = exercise_context.get('relevant_exercises', [])
+        if relevant_exercises:
+            user_message += f"RELEVANT EXERCISES FOR USER'S GOALS:\n"
+            for exercise in relevant_exercises[:5]:  # Top 5 most relevant
+                user_message += f"- {exercise.get('name', 'Unknown')}: {exercise.get('description', '')[:150]}...\n"
+            user_message += "\n"
+        
+        # Add user memory context
+        user_memory = context.get('user_memory', {})
+        recent_conversations = user_memory.get('recent_conversations', [])
+        if recent_conversations:
+            user_message += f"RECENT CONVERSATION HISTORY:\n"
+            for conv in recent_conversations[-5:]:  # Last 5 conversations
+                user_message += f"- User: {conv.get('message', '')}\n"
+                user_message += f"- AI: {conv.get('response', '')[:100]}...\n"
+            user_message += "\n"
+            
+            # Extract goals mentioned in recent conversations
+            mentioned_goals = []
+            for conv in recent_conversations:
+                message = conv.get('message', '').lower()
+                if any(goal in message for goal in ['shoulder', 'knee', 'handstand', 'pancake', 'flexibility', 'strength']):
+                    mentioned_goals.append(conv.get('message', ''))
+            
+            if mentioned_goals:
+                user_message += f"GOALS MENTIONED IN PREVIOUS CONVERSATIONS:\n"
+                for goal in mentioned_goals[-3:]:  # Last 3 goal mentions
+                    user_message += f"- {goal}\n"
+                user_message += "\n"
+            
+            # Extract injury information from recent conversations
+            mentioned_injuries = []
+            for conv in recent_conversations:
+                message = conv.get('message', '').lower()
+                if any(injury in message for injury in ['meniscus', 'rotator cuff', 'scapula', 'impingement', 'tear', 'injury']):
+                    mentioned_injuries.append(conv.get('message', ''))
+            
+            if mentioned_injuries:
+                user_message += f"INJURIES MENTIONED IN PREVIOUS CONVERSATIONS:\n"
+                for injury in mentioned_injuries[-3:]:  # Last 3 injury mentions
+                    user_message += f"- {injury}\n"
+                user_message += "\n"
+        
+        # Add conversation patterns
+        conversation_patterns = user_memory.get('conversation_patterns', {})
+        if conversation_patterns:
+            user_message += f"CONVERSATION PATTERNS:\n"
+            user_message += f"- Common intents: {conversation_patterns.get('common_intents', {})}\n"
+            user_message += f"- Total conversations: {conversation_patterns.get('total_conversations', 0)}\n\n"
+        
+        # Add feedback patterns
+        feedback_patterns = user_memory.get('feedback_patterns', {})
+        if feedback_patterns:
+            user_message += f"USER FEEDBACK PATTERNS:\n"
+            user_message += f"- Common feedback types: {feedback_patterns.get('common_feedback_types', {})}\n"
+            user_message += f"- Average rating: {feedback_patterns.get('average_rating', 0):.1f}/10\n\n"
+        
+        return user_message
         
         messages = [
             {"role": "system", "content": system_prompt},
