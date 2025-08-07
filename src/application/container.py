@@ -8,7 +8,10 @@ from domain.repositories.mentor_repository import MentorRepository
 from domain.services.coaching_service import CoachingService
 from infrastructure.database.sqlite.database import CoachDatabase
 from infrastructure.database.sqlite.exercise_repository import SQLiteExerciseRepository
+from infrastructure.database.sqlite.user_repository import SQLiteUserRepository
+from infrastructure.database.sqlite.user_memory_store import UserMemoryStore
 from infrastructure.database.vector_store.rag_system import MentorRAGSystem
+from infrastructure.database.vector_store.mentor_repository import RAGMentorRepository
 from infrastructure.external.openai_client import OpenAIClient
 from infrastructure.external.whatsapp_client import WhatsAppClient
 from infrastructure.external.prompt_engine import PromptEngine
@@ -84,44 +87,7 @@ class MockUserRepository(UserRepository):
         return {}
 
 
-class MockMentorRepository(MentorRepository):
-    """Mock mentor repository for development"""
-    
-    def get_mentor(self, mentor_id: str):
-        """Get mentor by ID - returns None for now"""
-        return None
-    
-    def get_mentor_by_name(self, name: str):
-        """Get mentor by name - returns None for now"""
-        return None
-    
-    def get_all_mentors(self):
-        """Get all mentors - returns empty list for now"""
-        return []
-    
-    def get_mentors_by_specialization(self, specialization):
-        """Get mentors by specialization - returns empty list for now"""
-        return []
-    
-    def search_mentors(self, query: str):
-        """Search mentors - returns empty list for now"""
-        return []
-    
-    def get_relevant_mentors_for_query(self, query: str):
-        """Get relevant mentors for query - returns empty list for now"""
-        return []
-    
-    def get_mentor_context(self, query: str, mentor_names=None):
-        """Get mentor context - returns placeholder for now"""
-        return "Focus on proper form and progressive overload."
-    
-    def get_weekly_planning_context(self):
-        """Get weekly planning context - returns placeholder for now"""
-        return "Plan balanced workouts with proper recovery."
-    
-    def get_mentor_statistics(self):
-        """Get mentor statistics - returns empty dict for now"""
-        return {}
+
 
 
 class Container:
@@ -138,9 +104,10 @@ class Container:
             self._services['database'] = CoachDatabase()
             
             # Repositories
-            self._services['user_repository'] = MockUserRepository()
+            self._services['user_repository'] = SQLiteUserRepository()
             self._services['exercise_repository'] = SQLiteExerciseRepository()
-            self._services['mentor_repository'] = MockMentorRepository()
+            self._services['mentor_repository'] = RAGMentorRepository()
+            self._services['user_memory_store'] = UserMemoryStore()
             
             # External services
             self._services['openai_client'] = OpenAIClient()
@@ -159,7 +126,8 @@ class Container:
             # Use cases
             self._services['get_coaching_response_use_case'] = GetCoachingResponseUseCase(
                 coaching_service=self._services['coaching_service'],
-                ai_client=self._services['openai_client']
+                ai_client=self._services['openai_client'],
+                user_memory_store=self._services['user_memory_store']
             )
             
             self._services['create_weekly_plan_use_case'] = CreateWeeklyPlanUseCase(

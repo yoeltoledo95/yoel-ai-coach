@@ -71,13 +71,13 @@ class MentorRAGSystem:
     def initialize_system(self):
         """Initialize the RAG system with ChromaDB and embedding model"""
         try:
-            # Initialize ChromaDB
+            # Initialize ChromaDB with latest version compatibility
             self.chroma_client = chromadb.PersistentClient(path="./chroma_db")
             
             # Initialize embedding model
             self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
             
-            # Get or create collection
+            # Get or create collection with updated metadata format
             self.collection = self.chroma_client.get_or_create_collection(
                 name="mentor_knowledge",
                 metadata={"hnsw:space": "cosine"}
@@ -89,6 +89,23 @@ class MentorRAGSystem:
             if self.collection.count() == 0:
                 logger.info("📚 Indexing mentor knowledge base...")
                 self.index_knowledge_base()
+            else:
+                logger.info(f"📚 Knowledge base already has {self.collection.count()} documents")
+                # Only re-index if we have fewer mentors than expected
+                current_count = self.collection.count()
+                if current_count < 50:  # Expected minimum documents for all mentors
+                    logger.info("🔄 Re-indexing to ensure all mentors are included...")
+                    # Delete all documents by using a valid condition
+                    try:
+                        # Get all document IDs first
+                        results = self.collection.get()
+                        if results['ids']:
+                            self.collection.delete(ids=results['ids'])
+                    except Exception as e:
+                        logger.warning(f"Could not clear collection: {e}")
+                    self.index_knowledge_base()
+                else:
+                    logger.info("✅ Knowledge base appears to have all mentors indexed")
             
         except Exception as e:
             logger.error(f"❌ Error initializing RAG system: {e}")
@@ -113,9 +130,13 @@ class MentorRAGSystem:
             import uuid
             doc_id = str(uuid.uuid4())
             
-            # Add to collection
+            # Generate embeddings using the embedding model
+            embeddings = self.embedding_model.encode([content]).tolist()
+            
+            # Add to collection with embeddings
             self.collection.add(
                 documents=[content],
+                embeddings=embeddings,
                 metadatas=[metadata],
                 ids=[doc_id]
             )
@@ -190,11 +211,22 @@ class MentorRAGSystem:
             # Import mentor knowledge directly
             import sys
             import os
-            sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'data', 'mentors'))
+            # Add the data/mentors directory to Python path
+            # Calculate path from current file location to project root
+            current_file = os.path.dirname(__file__)
+            project_root = os.path.join(current_file, '..', '..', '..', '..')
+            mentors_path = os.path.join(project_root, 'data', 'mentors')
+            mentors_path = os.path.abspath(mentors_path)  # Resolve to absolute path
+            sys.path.insert(0, mentors_path)
             
             try:
                 from mentor_brain import MENTOR_KNOWLEDGE
-            except ImportError:
+                logger.info(f"✅ Successfully imported MENTOR_KNOWLEDGE with {len(MENTOR_KNOWLEDGE)} mentors")
+            except ImportError as e:
+                logger.error(f"❌ Failed to import MENTOR_KNOWLEDGE: {e}")
+                logger.info(f"📁 Tried path: {mentors_path}")
+                logger.info(f"📁 Current working directory: {os.getcwd()}")
+                logger.info(f"📁 Available files: {os.listdir(mentors_path) if os.path.exists(mentors_path) else 'Path does not exist'}")
                 # Fallback to static mentor knowledge
                 MENTOR_KNOWLEDGE = {
                     "dylan_werner": {
@@ -284,7 +316,7 @@ class MentorRAGSystem:
             
             # Search the collection
             results = self.collection.query(
-                query_embeddings=query_embedding.tolist(),
+                query_embeddings=[query_embedding.tolist()],
                 n_results=top_k,
                 where=where_clause
             )
@@ -292,11 +324,12 @@ class MentorRAGSystem:
             # Format results
             formatted_results = []
             for i in range(len(results['documents'][0])):
+                metadata = results['metadatas'][0][i]
                 formatted_results.append({
                     'text': results['documents'][0][i],
-                    'mentor': results['metadatas'][0][i]['mentor'],
-                    'source': results['metadatas'][0][i]['source'],
-                    'type': results['metadatas'][0][i]['type'],
+                    'mentor': metadata.get('mentor', 'unknown'),
+                    'source': metadata.get('source', 'mentor_brain.py'),
+                    'type': metadata.get('type', 'general'),
                     'distance': results['distances'][0][i] if 'distances' in results else None
                 })
             

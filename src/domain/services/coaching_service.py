@@ -328,32 +328,32 @@ Mentor context: {mentor_context}
 
 Generate a natural, helpful response that addresses their message appropriately."""
     
-    def _create_new_user_profile(self, user_id: str) -> Optional[User]:
-        """Create a new user profile with default settings"""
+    def _create_new_user_profile(self, user_id: str, user_name: str = "User") -> Optional[User]:
+        """Create a new user profile with minimal defaults - let AI gather real info"""
         try:
             from ..entities.user import UserProfile, UserLevel, UserGoal
             
-            # Create default profile
+            # Create minimal profile - AI will gather real information
             default_profile = UserProfile(
-                name="User",
-                age=25,  # Default age
-                goals=[UserGoal.STRENGTH],  # Default goal
-                level=UserLevel.BEGINNER,  # Default level
+                name=user_name,
+                age=None,  # Let AI ask for real age
+                goals=[],  # Let AI ask for real goals
+                level=UserLevel.BEGINNER,  # Will be updated based on conversation
                 training_preferences={
-                    "split": "Full Body",
-                    "training_days": 3,
-                    "preferred_style": "calisthenics",
-                    "secondary_activities": ["mobility"]
+                    "split": "Not specified",
+                    "training_days": 0,
+                    "preferred_style": "Not specified",
+                    "secondary_activities": []
                 },
                 injury_history={},
                 nutrition_preferences={
-                    "diet": "flexible",
+                    "diet": "Not specified",
                     "favorites": []
                 },
                 recovery_needs={
-                    "sleep_target": 7.5,
-                    "stress_management": "important",
-                    "mobility_work": "daily"
+                    "sleep_target": None,
+                    "stress_management": "Not specified",
+                    "mobility_work": "Not specified"
                 }
             )
             

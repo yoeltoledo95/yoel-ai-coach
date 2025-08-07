@@ -28,6 +28,9 @@ class WhatsAppInterface:
         self.create_weekly_plan_use_case = create_weekly_plan_use_case
         self.analyze_patterns_use_case = analyze_patterns_use_case
         
+        # Conversation memory for context
+        self.conversation_memory = {}
+        
         # Initialize Flask app
         self.app = Flask(__name__)
         self._setup_routes()
@@ -69,6 +72,7 @@ class WhatsAppInterface:
                 
                 # Extract message details
                 user_id = message_info.get("user_id")
+                user_name = message_info.get("user_name", "User")
                 message_text = message_info.get("text", "")
                 message_type = message_info.get("message_type")
                 
@@ -76,11 +80,13 @@ class WhatsAppInterface:
                     return 'OK', 200
                 
                 # Route message to appropriate use case
-                response = self._route_message(user_id, message_text, message_type)
+                response = self._route_message(user_id, message_text, message_type, user_name)
                 
-                # Send response back to user
-                if response:
-                    self.whatsapp_client.send_message(user_id, response)
+                # Send response back to user (only once)
+                if response and response.strip():
+                    success = self.whatsapp_client.send_message(user_id, response)
+                    if not success:
+                        logger.error(f"Failed to send message to user {user_id}")
                 
                 return 'OK', 200
                 
@@ -96,14 +102,22 @@ class WhatsAppInterface:
                 "service": "AI Coach WhatsApp Bot"
             })
     
-    def _route_message(self, user_id: str, message: str, message_type: str) -> str:
+    def _route_message(self, user_id: str, message: str, message_type: str, user_name: str = "User") -> str:
         """Route message to appropriate use case"""
         try:
-            message_lower = message.lower()
+            message_lower = message.lower().strip()
             
-            # Extract information from message
-            extracted_info = self.coaching_response_use_case.extract_user_info(message)
-            sentiment = self.coaching_response_use_case.analyze_sentiment(message)
+            # Update conversation memory
+            if user_id not in self.conversation_memory:
+                self.conversation_memory[user_id] = {}
+            
+            self.conversation_memory[user_id]["last_message"] = message
+            self.conversation_memory[user_id]["timestamp"] = "now"
+            
+            # Handle greetings first
+            greetings = ["hello", "hi", "hey", "good morning", "good afternoon", "good evening", "sup", "what's up"]
+            if any(greeting in message_lower for greeting in greetings):
+                return self._handle_greeting(user_id, message)
             
             # Route based on message content
             if any(keyword in message_lower for keyword in ["plan", "schedule", "weekly"]):
@@ -114,6 +128,14 @@ class WhatsAppInterface:
                 else:
                     return "I'm having trouble creating your weekly plan. Please try again later."
             
+            elif any(keyword in message_lower for keyword in ["goal", "goals", "set goal", "new goal", "target"]):
+                # Handle goal setting with AI
+                context = self.conversation_memory.get(user_id, {})
+                context["goal_setting"] = True
+                return self.coaching_response_use_case.execute(user_id, message, {
+                    "conversation_context": context
+                }, user_name)
+            
             elif any(keyword in message_lower for keyword in ["progress", "analysis", "stats", "pattern"]):
                 # Analyze user patterns
                 analysis = self.analyze_patterns_use_case.execute(user_id)
@@ -122,16 +144,35 @@ class WhatsAppInterface:
                 else:
                     return "I'm having trouble analyzing your progress. Please try again later."
             
+            elif message_lower in ["?", "what", "how", "why", "explain"]:
+                # Handle follow-up questions with AI
+                context = self.conversation_memory.get(user_id, {})
+                return self.coaching_response_use_case.execute(user_id, message, {
+                    "conversation_context": context,
+                    "follow_up_question": True
+                }, user_name)
+            
             else:
                 # Get general coaching response
-                return self.coaching_response_use_case.execute(user_id, message, {
-                    "extracted_info": extracted_info,
-                    "sentiment": sentiment
-                })
+                return self.coaching_response_use_case.execute(user_id, message, {}, user_name)
                 
         except Exception as e:
             logger.error(f"Error routing message for user {user_id}: {e}")
             return "I'm having trouble processing your message. Please try again later."
+    
+    def _handle_greeting(self, user_id: str, message: str) -> str:
+        """Handle greeting messages"""
+        return f"""Hey there! 👋 
+
+I'm your AI fitness coach, ready to help you crush your fitness goals! 
+
+What would you like to work on today?
+• 💪 Get a personalized workout plan
+• 📊 Check your progress and patterns  
+• 🎯 Set new goals or update your profile
+• ❓ Ask me anything about fitness and movement
+
+Just let me know what you need!"""
     
     def _format_analysis_response(self, analysis: Dict[str, Any]) -> str:
         """Format analysis response for WhatsApp"""
@@ -152,6 +193,8 @@ class WhatsAppInterface:
                 response += f"• {rec}\n"
         
         return response
+    
+
     
     def run(self, host: str = '0.0.0.0', port: int = 8000, debug: bool = False):
         """Run the Flask application"""

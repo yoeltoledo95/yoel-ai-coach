@@ -183,11 +183,21 @@ class WhatsAppClient:
                 if not user_id:
                     user_id = message.get("contact", {}).get("wa_id") if isinstance(message.get("contact"), dict) else None
             
+            # Extract user name from contacts
+            user_name = "User"
+            contacts = value.get("contacts", [])
+            if contacts:
+                contact = contacts[0]
+                profile = contact.get("profile", {})
+                user_name = profile.get("name", "User")
+            
             logger.info(f"🔍 Extracted user_id: {user_id}")
+            logger.info(f"🔍 Extracted user_name: {user_name}")
             logger.info(f"Processing message from {user_id}: {text_content[:50]}...")
             
             return {
                 "user_id": user_id,
+                "user_name": user_name,
                 "message_type": message_type,
                 "timestamp": message.get("timestamp"),
                 "text": text_content,
