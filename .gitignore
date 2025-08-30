@@ -46,4 +46,4 @@ Thumbs.db
 *.temp 
 
 # Ignore environment variable files
-.env 
+.env data/users/user_memory.db
