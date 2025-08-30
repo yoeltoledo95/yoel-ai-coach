@@ -4,6 +4,9 @@ Use case: Get personalized coaching response
 from typing import Dict, Any, Optional, List
 from domain.services.coaching_service import CoachingService
 from infrastructure.external.openai_client import OpenAIClient
+from infrastructure.external.prompt_engine import PromptEngine
+from shared.ai.personality_engine import personality_engine
+from shared.ai.advanced_prompts import advanced_prompt_engine
 from infrastructure.database.sqlite.user_memory_store import UserMemoryStore
 from shared.logging import get_logger
 
@@ -40,11 +43,36 @@ class GetCoachingResponseUseCase:
             # Debug: Log the dynamic context
             logger.info(f"Dynamic context for user {user_id}: {dynamic_context}")
             
-            # Generate AI response with dynamic prompt
-            response = self.ai_client.generate_coaching_response(
-                user_input=user_input,
-                context=dynamic_context
+            # Enhanced AI response generation
+            user_id = dynamic_context.get("user_id", user_id)
+            
+            # Get personality context
+            personality_context = personality_engine.get_personality_context(
+                user_id=user_id,
+                emotional_context=self._detect_emotional_context(user_input, dynamic_context)
             )
+            
+            # Determine optimal prompt type
+            prompt_type = advanced_prompt_engine.get_prompt_type_from_context(
+                user_input, dynamic_context
+            )
+            
+            # Build advanced multi-layered prompt
+            built = advanced_prompt_engine.build_advanced_prompt(
+                prompt_type=prompt_type,
+                context=dynamic_context,
+                personality_context=personality_context,
+                user_input=user_input
+            )
+
+            # Send via OpenAI client
+            response = self.ai_client.generate_from_prompt(
+                system_prompt=built["system"],
+                user_message=built["user"]
+            )
+            
+            # Enhance response naturalness
+            response = personality_engine.enhance_response_naturalness(response)
             
             # Store the conversation in user memory
             conversation_context = context or {}
@@ -80,6 +108,9 @@ class GetCoachingResponseUseCase:
                 if not user:
                     logger.error(f"Failed to create user profile for {user_id}")
                     return {"user_input": user_input}
+            
+            # Update user profile with information from conversation
+            self._update_user_profile_from_conversation(user_id, user_input, {})
             
             # Convert user profile to JSON-serializable format
             user_profile = {}
@@ -400,7 +431,9 @@ class GetCoachingResponseUseCase:
                 "shoulder": "mobility",
                 "knee": "mobility", 
                 "handstand": "skill",
+                "press to handstand": "skill",
                 "pancake": "flexibility",
+                "pancake stretch": "flexibility",
                 "flexibility": "flexibility",
                 "strength": "strength",
                 "muscle": "strength",
@@ -411,7 +444,9 @@ class GetCoachingResponseUseCase:
                 "mobility": "mobility",
                 "skill": "skill",
                 "balance": "skill",
-                "coordination": "skill"
+                "coordination": "skill",
+                "joint health": "mobility",
+                "joint": "mobility"
             }
             
             for phrase, goal in goal_mapping.items():
@@ -440,8 +475,6 @@ class GetCoachingResponseUseCase:
                     logger.error(f"Error converting goal {goal_str} to enum: {e}")
             
             return enum_goals
-            
-            return goals
             
         except Exception as e:
             logger.error(f"Error extracting goals from input: {e}")
@@ -507,28 +540,40 @@ class GetCoachingResponseUseCase:
             # Check for knee injuries
             if "meniscus" in user_input_lower or "meniscal" in user_input_lower:
                 if "left knee" in user_input_lower:
-                    injury_info["left_knee"] = "meniscus tear"
+                    injury_info["left_knee"] = "past meniscus tear - no ongoing pain, building capacity through ATG training"
                 elif "right knee" in user_input_lower:
-                    injury_info["right_knee"] = "meniscus tear"
+                    injury_info["right_knee"] = "past meniscus tear - no ongoing pain, building capacity through ATG training"
                 else:
-                    injury_info["knee"] = "meniscus tear"
+                    injury_info["knee"] = "past meniscus tear - no ongoing pain, building capacity through ATG training"
             
-            # Check for shoulder injuries
-            if "rotator cuff" in user_input_lower:
-                if "right shoulder" in user_input_lower:
-                    injury_info["right_shoulder"] = "rotator cuff problems"
-                elif "left shoulder" in user_input_lower:
-                    injury_info["left_shoulder"] = "rotator cuff problems"
-                else:
-                    injury_info["shoulder"] = "rotator cuff problems"
+            # Check for shoulder injuries and pain
+            if any(term in user_input_lower for term in ["shoulder pain", "biceps tendon", "trapezius", "rotator cuff"]):
+                shoulder_details = []
+                
+                if "biceps tendon" in user_input_lower:
+                    shoulder_details.append("biceps tendon pain (long head) - aggravated by forward arm movement and bear crawl")
+                
+                if "trapezius" in user_input_lower or "upper trap" in user_input_lower:
+                    shoulder_details.append("upper trapezius pain - radiating from shoulder to neck during overhead pressing")
+                
+                if "protraction" in user_input_lower or "punching" in user_input_lower:
+                    shoulder_details.append("trapezius discomfort during shoulder protraction")
+                
+                if "rotator cuff" in user_input_lower:
+                    shoulder_details.append("possible rotator cuff involvement (supraspinatus/infraspinatus tension)")
+                
+                if "scapular" in user_input_lower or "scapula" in user_input_lower:
+                    shoulder_details.append("scapular instability or trap dominance")
+                
+                if shoulder_details:
+                    injury_info["shoulder"] = "; ".join(shoulder_details)
             
-            if "scapula" in user_input_lower and "impingement" in user_input_lower:
-                if "right shoulder" in user_input_lower:
-                    injury_info["right_shoulder"] = injury_info.get("right_shoulder", "") + ", scapula impingement"
-                elif "left shoulder" in user_input_lower:
-                    injury_info["left_shoulder"] = injury_info.get("left_shoulder", "") + ", scapula impingement"
-                else:
-                    injury_info["shoulder"] = injury_info.get("shoulder", "") + ", scapula impingement"
+            # Check for specific movement aggravations
+            if "bear crawl" in user_input_lower:
+                injury_info["movement_limitations"] = injury_info.get("movement_limitations", "") + "; bear crawl aggravates shoulder"
+            
+            if "overhead" in user_input_lower and "press" in user_input_lower:
+                injury_info["movement_limitations"] = injury_info.get("movement_limitations", "") + "; overhead pressing aggravates shoulder"
             
             # Check for other common injuries
             if "back" in user_input_lower and ("pain" in user_input_lower or "injury" in user_input_lower):
@@ -544,4 +589,22 @@ class GetCoachingResponseUseCase:
             
         except Exception as e:
             logger.error(f"Error extracting injury info from input: {e}")
-            return {} 
+            return {}
+    
+    def _detect_emotional_context(self, user_input: str, context: Dict[str, Any]) -> Optional[str]:
+        """Detect emotional context from user input and conversation history"""
+        input_lower = user_input.lower()
+        
+        # Analyze for emotional indicators
+        if any(word in input_lower for word in ['excited', 'amazing', 'awesome', 'great', 'fantastic']):
+            return 'excitement'
+        elif any(word in input_lower for word in ['pain', 'hurt', 'concerned', 'worried', 'afraid']):
+            return 'concern'
+        elif any(word in input_lower for word in ['tired', 'unmotivated', 'struggle', 'difficult']):
+            return 'support'
+        elif any(word in input_lower for word in ['achieved', 'progress', 'better', 'improved']):
+            return 'celebration'
+        elif any(word in input_lower for word in ['curious', 'wondering', 'why', 'how', 'explain']):
+            return 'curiosity'
+        else:
+            return None 

@@ -6,8 +6,8 @@ from typing import Dict, Any
 from flask import Flask, request, jsonify
 from infrastructure.external.whatsapp_client import WhatsAppClient
 from application.use_cases.get_coaching_response import GetCoachingResponseUseCase
-from application.use_cases.create_weekly_plan import CreateWeeklyPlanUseCase
-from application.use_cases.analyze_user_patterns import AnalyzeUserPatternsUseCase
+# from application.use_cases.create_weekly_plan import CreateWeeklyPlanUseCase  # Disabled for now
+# from application.use_cases.analyze_user_patterns import AnalyzeUserPatternsUseCase  # Disabled for now
 from shared.logging import get_logger
 
 logger = get_logger(__name__)
@@ -20,13 +20,13 @@ class WhatsAppInterface:
         self,
         whatsapp_client: WhatsAppClient,
         coaching_response_use_case: GetCoachingResponseUseCase,
-        create_weekly_plan_use_case: CreateWeeklyPlanUseCase,
-        analyze_patterns_use_case: AnalyzeUserPatternsUseCase
+        # create_weekly_plan_use_case: CreateWeeklyPlanUseCase,  # Disabled
+        # analyze_patterns_use_case: AnalyzeUserPatternsUseCase  # Disabled
     ):
-        self.whatsapp_client = whatsapp_client
+        self.whatsapp_client = None  # WhatsApp disabled per current scope
         self.coaching_response_use_case = coaching_response_use_case
-        self.create_weekly_plan_use_case = create_weekly_plan_use_case
-        self.analyze_patterns_use_case = analyze_patterns_use_case
+        # self.create_weekly_plan_use_case = create_weekly_plan_use_case  # Disabled
+        # self.analyze_patterns_use_case = analyze_patterns_use_case  # Disabled
         
         # Conversation memory for context
         self.conversation_memory = {}
@@ -47,7 +47,11 @@ class WhatsAppInterface:
                 challenge = request.args.get('hub.challenge')
                 
                 if mode and token and challenge:
-                    result = self.whatsapp_client.verify_webhook(mode, token, challenge)
+                    if self.whatsapp_client:
+                        result = self.whatsapp_client.verify_webhook(mode, token, challenge)
+                    else:
+                        logger.warning("WhatsApp client not configured; auto-approving in dev mode")
+                        result = challenge
                     if result:
                         return challenge
                 
@@ -64,7 +68,19 @@ class WhatsAppInterface:
                 data = request.get_json()
                 
                 # Process the webhook message
-                message_info = self.whatsapp_client.process_webhook_message(data)
+                if self.whatsapp_client:
+                    message_info = self.whatsapp_client.process_webhook_message(data)
+                else:
+                    # Minimal parser for tests/dev when no client
+                    entry = (data or {}).get("entry", [{}])[0]
+                    value = entry.get("changes", [{}])[0].get("value", {})
+                    msg = (value.get("messages") or [{}])[0]
+                    message_info = {
+                        "user_id": msg.get("from") or "dev_user",
+                        "user_name": (value.get("contacts", [{}])[0].get("profile", {}).get("name") if value.get("contacts") else "User"),
+                        "message_type": msg.get("type", "text"),
+                        "text": (msg.get("text", {}) or {}).get("body", ""),
+                    }
                 
                 if "error" in message_info:
                     logger.error(f"Error processing webhook: {message_info['error']}")
@@ -83,7 +99,7 @@ class WhatsAppInterface:
                 response = self._route_message(user_id, message_text, message_type, user_name)
                 
                 # Send response back to user (only once)
-                if response and response.strip():
+                if response and response.strip() and self.whatsapp_client:
                     success = self.whatsapp_client.send_message(user_id, response)
                     if not success:
                         logger.error(f"Failed to send message to user {user_id}")

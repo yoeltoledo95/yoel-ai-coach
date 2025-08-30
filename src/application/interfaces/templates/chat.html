@@ -155,6 +155,22 @@
         .status.error {
             color: #FF3B30;
         }
+        
+        .copy-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 16px;
+            border-radius: 15px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
     </style>
 </head>
 <body>
@@ -162,6 +178,7 @@
         <div class="chat-header">
             <h1>🤖 AI Fitness Coach</h1>
             <p>Your personal fitness companion</p>
+            <button id="copyButton" class="copy-btn">📋 Copy Chat</button>
         </div>
         
         <div class="chat-messages" id="messages">
@@ -232,9 +249,10 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
+                    credentials: 'include',
                     body: JSON.stringify({
                         message: message,
-                        user_id: 'web_user'
+                        user_name: 'User'
                     })
                 });
                 
@@ -274,11 +292,34 @@
             }
         });
         
+        // Copy conversation function
+        function copyConversation() {
+            const messages = document.querySelectorAll('.message');
+            let conversation = 'AI Fitness Coach Conversation:\n\n';
+            
+            messages.forEach(message => {
+                const isUser = message.classList.contains('user');
+                const text = message.textContent;
+                conversation += `${isUser ? 'You' : 'AI Coach'}: ${text}\n\n`;
+            });
+            
+            navigator.clipboard.writeText(conversation).then(() => {
+                setStatus('Conversation copied to clipboard!', 'connected');
+                setTimeout(() => setStatus('Connected', 'connected'), 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                setStatus('Failed to copy conversation', 'error');
+            });
+        }
+        
+        // Copy button event listener
+        document.getElementById('copyButton').addEventListener('click', copyConversation);
+        
         // Focus input on load
         messageInput.focus();
         
         // Check health on load
-        fetch('/api/health')
+        fetch('/api/health', { credentials: 'include' })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'healthy') {

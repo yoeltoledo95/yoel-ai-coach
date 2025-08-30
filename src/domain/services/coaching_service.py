@@ -1,11 +1,9 @@
 """
 Coaching service - core business logic for AI coaching
 """
-import json
 import logging
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timedelta
-from pathlib import Path
 
 from ..entities.user import User, UserSession, UserLevel, UserGoal, UserProfile
 from ..entities.exercise import Exercise
@@ -13,6 +11,8 @@ from ..entities.mentor import Mentor
 from ..repositories.user_repository import UserRepository
 from ..repositories.exercise_repository import ExerciseRepository
 from ..repositories.mentor_repository import MentorRepository
+from .configuration_service import ConfigurationService
+from shared.exceptions import ConfigurationError
 from shared.logging import get_logger
 
 logger = get_logger(__name__)
@@ -21,27 +21,13 @@ logger = get_logger(__name__)
 class WorkoutProgrammingService:
     """Service for creating workout programs based on best practices"""
     
-    def __init__(self):
-        self.programming_rules = self._load_programming_rules()
-    
-    def _load_programming_rules(self) -> Dict[str, Any]:
-        """Load workout programming rules from knowledge base"""
-        try:
-            # Try relative to current directory first, then relative to project root
-            rules_path = Path("data/knowledge_base/workout_programming_rules.json")
-            if not rules_path.exists():
-                rules_path = Path("../data/knowledge_base/workout_programming_rules.json")
-            
-            with open(rules_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except Exception as e:
-            logger.warning(f"Could not load programming rules: {e}")
-            return {}
+    def __init__(self, config_service: ConfigurationService):
+        self.config_service = config_service
+        self.programming_rules = self.config_service.get_workout_programming_rules()
     
     def get_programming_guidelines(self, focus_area: str) -> Dict[str, Any]:
         """Get programming guidelines for a specific focus area"""
-        rules = self.programming_rules.get("workout_programming_rules", {})
-        return rules.get(focus_area, {})
+        return self.config_service.get_programming_guidelines(focus_area)
     
     def create_weekly_template(self, user_profile: UserProfile) -> Dict[str, str]:
         """Create a weekly workout template based on user goals"""
@@ -86,12 +72,14 @@ class CoachingService:
         self,
         user_repository: UserRepository,
         exercise_repository: ExerciseRepository,
-        mentor_repository: MentorRepository
+        mentor_repository: MentorRepository,
+        ai_client=None,
     ):
         self.user_repository = user_repository
         self.exercise_repository = exercise_repository
         self.mentor_repository = mentor_repository
-        self.workout_programming = WorkoutProgrammingService()
+# Simplified: removed unused workout programming service
+        self.ai_client = ai_client
     
     def get_personalized_response(
         self, 
@@ -147,22 +135,82 @@ class CoachingService:
                 "user_id": "yoel",
                 "name": "Yoel",
                 "age": 30,
-                "goals": ["strength", "endurance", "mobility"],
+                "goals": ["push to handstand", "pancake flexibility", "fix muscular imbalances", "boost energy", "build muscle", "strength", "endurance", "mobility"],
                 "training_preferences": {
-                    "split": "Push/Pull/Legs",
-                    "training_days": 4,
+                    "split": "4-6 days per week",
+                    "training_days": 5,
                     "preferred_style": "calisthenics",
-                    "secondary_activities": ["yoga", "mobility"]
+                    "secondary_activities": ["kettlebells", "yoga", "band work", "athletic movement"],
+                    "no_machines": True,
+                    "focus": "movement quality over quantity"
+                },
+                "specific_skills": {
+                    "push_to_handstand": "in progress",
+                    "pancake": "working on hip mobility and hamstring flexibility",
+                    "muscular_imbalances": "shoulder issues, working on symmetry",
+                    "athletic_movement": "focus on natural patterns"
                 },
                 "injury_history": {
                     "shoulder": "ongoing issues, needs careful management",
                     "knee": "recovered, can do more work now"
                 },
-                "nutrition_preferences": {},
+                "mentor_influences": [
+                    "Ido Portal - movement complexity and natural patterns",
+                    "Emmet Louis - end-range mobility strength",
+                    "Tom Merrick - clean calisthenics and flexibility",
+                    "Dylan Werner - isometric strength and body control",
+                    "Patrick Beach - fluid mobility and breath connection"
+                ],
+                "nutrition_preferences": {
+                    "diet": "flexible, focuses on protein and clean carbs",
+                    "favorites": ["eggs with tahini", "chicken with rice", "vegetables"]
+                },
                 "recovery_needs": {
                     "sleep_target": 7.5,
                     "stress_management": "important",
-                    "mobility_work": "daily"
+                    "mobility_work": "daily",
+                    "active_recovery": "movement-based recovery"
+                }
+            },
+            "yoel_user": {  # Web interface user ID for Yoel
+                "user_id": "yoel",
+                "name": "Yoel",
+                "age": 30,
+                "goals": ["push to handstand", "pancake flexibility", "fix muscular imbalances", "boost energy", "build muscle", "strength", "endurance", "mobility"],
+                "training_preferences": {
+                    "split": "4-6 days per week",
+                    "training_days": 5,
+                    "preferred_style": "calisthenics",
+                    "secondary_activities": ["kettlebells", "yoga", "band work", "athletic movement"],
+                    "no_machines": True,
+                    "focus": "movement quality over quantity"
+                },
+                "specific_skills": {
+                    "push_to_handstand": "in progress",
+                    "pancake": "working on hip mobility and hamstring flexibility",
+                    "muscular_imbalances": "shoulder issues, working on symmetry",
+                    "athletic_movement": "focus on natural patterns"
+                },
+                "injury_history": {
+                    "shoulder": "ongoing issues, needs careful management",
+                    "knee": "recovered, can do more work now"
+                },
+                "mentor_influences": [
+                    "Ido Portal - movement complexity and natural patterns",
+                    "Emmet Louis - end-range mobility strength",
+                    "Tom Merrick - clean calisthenics and flexibility",
+                    "Dylan Werner - isometric strength and body control",
+                    "Patrick Beach - fluid mobility and breath connection"
+                ],
+                "nutrition_preferences": {
+                    "diet": "flexible, focuses on protein and clean carbs",
+                    "favorites": ["eggs with tahini", "chicken with rice", "vegetables"]
+                },
+                "recovery_needs": {
+                    "sleep_target": 7.5,
+                    "stress_management": "important",
+                    "mobility_work": "daily",
+                    "active_recovery": "movement-based recovery"
                 }
             }
         }
@@ -227,12 +275,12 @@ class CoachingService:
     def _generate_ai_response(self, context: Dict[str, Any]) -> str:
         """Generate AI response for natural conversation"""
         try:
-            # Import here to avoid circular imports
-            from infrastructure.external.openai_client import OpenAIClient
-            
-            # Create AI client instance
-            ai_client = OpenAIClient()
-            
+            # Require injected AI client (no mock/factory)
+            if not self.ai_client:
+                raise ConfigurationError("AI client not configured in CoachingService")
+
+            ai_client = self.ai_client
+
             # Build prompt for AI
             prompt = self._build_ai_prompt(context)
             

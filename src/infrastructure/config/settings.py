@@ -1,113 +1,108 @@
 """
-Application configuration management
+Configuration settings for the AI coach application.
+Enhanced with environment-specific configurations and validation.
 """
 import os
-from typing import Optional
-from dataclasses import dataclass, field
+from typing import Union
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables first
+load_dotenv()
+
+# Import environment-specific configurations
+from .base import BaseConfig
+from .development import DevelopmentConfig
+from .production import ProductionConfig
+from .testing import TestingConfig
 
 
-@dataclass
-class DatabaseConfig:
-    """Database configuration"""
-    sqlite_path: str = "data/users/user_memory.db"
-    chroma_path: str = "data/vector_store"
-    backup_enabled: bool = True
-
-
-@dataclass
-class OpenAIConfig:
-    """OpenAI configuration"""
-    api_key: Optional[str] = None
-    model: str = "gpt-4o"
-    max_tokens: int = 1200
-    temperature: float = 0.8
-    timeout: int = 30
-
-
-@dataclass
-class WhatsAppConfig:
-    """WhatsApp configuration"""
-    api_token: Optional[str] = None
-    phone_number_id: Optional[str] = None
-    business_id: Optional[str] = None
-    api_url: Optional[str] = None
-    webhook_secret: Optional[str] = None
-
-
-@dataclass
-class AppConfig:
-    """Main application configuration"""
-    # Environment
-    environment: str = "development"
-    debug: bool = True
+def get_config() -> BaseConfig:
+    """
+    Get configuration based on environment.
     
-    # Paths
-    base_path: Path = Path(__file__).parent.parent.parent.parent
-    data_path: Path = base_path / "data"
-    logs_path: Path = base_path / "logs"
+    Returns:
+        Configuration instance for current environment
+    """
+    env = os.getenv('ENVIRONMENT', 'development').lower()
     
-    # Database
-    database: DatabaseConfig = field(default_factory=DatabaseConfig)
+    config_mapping = {
+        'development': DevelopmentConfig,
+        'production': ProductionConfig,
+        'testing': TestingConfig,
+        'staging': ProductionConfig,  # Use production config for staging
+    }
     
-    # External APIs
-    openai: OpenAIConfig = field(default_factory=OpenAIConfig)
-    whatsapp: WhatsAppConfig = field(default_factory=WhatsAppConfig)
+    config_class = config_mapping.get(env, DevelopmentConfig)
     
-    # Features
-    enable_rag: bool = True
-    enable_image_processing: bool = True
-    enable_weekly_planning: bool = True
+    try:
+        return config_class()
+    except Exception as e:
+        # Fallback to base config if environment-specific config fails
+        print(f"Warning: Failed to load {env} config: {e}")
+        print("Falling back to base configuration")
+        return BaseConfig()
+
+
+# Global config instance
+config = get_config()
+
+# Legacy compatibility attributes for existing code
+class LegacyConfigAdapter:
+    """Adapter to maintain backward compatibility with existing code"""
     
-    def __post_init__(self):
-        """Initialize configuration from environment variables"""
-        # OpenAI
-        self.openai.api_key = os.getenv("OPENAI_API_KEY")
-        self.openai.model = os.getenv("OPENAI_MODEL", "gpt-4o")
-        
-        # WhatsApp
-        self.whatsapp.api_token = os.getenv("WHATSAPP_API_TOKEN")
-        self.whatsapp.phone_number_id = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
-        self.whatsapp.business_id = os.getenv("WHATSAPP_BUSINESS_ID")
-        self.whatsapp.webhook_secret = os.getenv("WHATSAPP_VERIFY_TOKEN")
-        
-        # Environment
-        self.environment = os.getenv("ENVIRONMENT", "development")
-        self.debug = os.getenv("DEBUG", "true").lower() == "true"
-        
-        # Create directories
-        self.data_path.mkdir(exist_ok=True)
-        self.logs_path.mkdir(exist_ok=True)
-        (self.data_path / "users").mkdir(exist_ok=True)
-        (self.data_path / "exercises").mkdir(exist_ok=True)
-        (self.data_path / "mentors").mkdir(exist_ok=True)
+    def __init__(self, modern_config: BaseConfig):
+        self._config = modern_config
     
-    def validate(self) -> bool:
-        """Validate configuration"""
-        errors = []
-        
-        if not self.openai.api_key:
-            errors.append("OPENAI_API_KEY is required")
-        
-        if self.environment == "production":
-            if not self.whatsapp.api_token:
-                errors.append("WHATSAPP_API_TOKEN is required in production")
-            if not self.whatsapp.phone_number_id:
-                errors.append("WHATSAPP_PHONE_NUMBER_ID is required in production")
-        
-        if errors:
-            raise ValueError(f"Configuration errors: {', '.join(errors)}")
-        
-        return True
+    @property
+    def debug(self) -> bool:
+        return self._config.debug
     
-    def get_database_url(self) -> str:
-        """Get database URL"""
-        return f"sqlite:///{self.database.sqlite_path}"
+    @property
+    def host(self) -> str:
+        return self._config.host
+    
+    @property
+    def port(self) -> int:
+        return self._config.port
+    
+    @property
+    def database_path(self) -> str:
+        return self._config.database_path
+    
+    @property
+    def user_memory_db_path(self) -> str:
+        return self._config.user_memory_db_path
+    
+    @property
+    def chroma_path(self) -> str:
+        return self._config.chroma_path
+    
+    @property
+    def openai_api_key(self) -> str:
+        return self._config.openai_api_key or ""
+    
+    @property
+    def openai_model(self) -> str:
+        return self._config.openai_model
+    
+    @property
+    def openai_max_tokens(self) -> int:
+        return self._config.openai_max_tokens
     
     def get_chroma_path(self) -> str:
-        """Get ChromaDB path"""
-        return str(self.database.chroma_path)
+        return self._config.get_chroma_path()
+    
+    def validate(self) -> bool:
+        """Legacy validation method"""
+        return True  # New config has built-in validation
 
 
-# Global configuration instance
-config = AppConfig() 
+# For direct access to modern config
+modern_config = config
+
+# For legacy code compatibility - expose the adapter
+config = LegacyConfigAdapter(modern_config)
+
+# Export both for flexibility
+__all__ = ['config', 'modern_config', 'get_config']

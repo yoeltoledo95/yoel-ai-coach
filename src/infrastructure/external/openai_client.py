@@ -6,7 +6,7 @@ import time
 from typing import Dict, Any, Optional, List
 import openai
 from openai import OpenAI
-from shared.exceptions import AIError, ConfigurationError
+from shared.exceptions import OpenAIError, ConfigurationError
 from infrastructure.config.settings import config
 
 logger = logging.getLogger(__name__)
@@ -16,14 +16,14 @@ class OpenAIClient:
     """OpenAI client with error handling and retry logic"""
     
     def __init__(self):
-        if not config.openai.api_key:
+        if not getattr(config, 'openai_api_key', None):
             raise ConfigurationError("OpenAI API key is required")
-        
-        self.client = OpenAI(api_key=config.openai.api_key)
-        self.model = config.openai.model
-        self.max_tokens = config.openai.max_tokens
-        self.temperature = config.openai.temperature
-        self.timeout = config.openai.timeout
+
+        self.client = OpenAI(api_key=getattr(config, 'openai_api_key', ''))
+        self.model = getattr(config, 'openai_model', 'gpt-4o-mini')
+        self.max_tokens = getattr(config, 'openai_max_tokens', 2000)
+        self.temperature = getattr(config, 'openai_temperature', 0.7)
+        self.timeout = getattr(config, 'openai_timeout', 30)
     
     def generate_response(
         self, 
@@ -36,7 +36,7 @@ class OpenAIClient:
                 response = self.client.chat.completions.create(
                     model=self.model,
                     messages=messages,
-                    max_tokens=self.max_tokens,
+                    max_tokens=min(self.max_tokens, 900),
                     temperature=self.temperature,
                     timeout=self.timeout
                 )
@@ -44,7 +44,7 @@ class OpenAIClient:
                 if response.choices and response.choices[0].message:
                     return response.choices[0].message.content
                 else:
-                    raise AIError("Empty response from OpenAI")
+                    raise OpenAIError("Empty response from OpenAI")
                     
             except openai.RateLimitError as e:
                 if attempt < max_retries - 1:
@@ -53,7 +53,7 @@ class OpenAIClient:
                     time.sleep(wait_time)
                     continue
                 else:
-                    raise AIError(f"Rate limit exceeded after {max_retries} attempts: {e}")
+                    raise OpenAIError(f"Rate limit exceeded after {max_retries} attempts: {e}")
                     
             except openai.APIError as e:
                 if attempt < max_retries - 1:
@@ -62,12 +62,25 @@ class OpenAIClient:
                     time.sleep(wait_time)
                     continue
                 else:
-                    raise AIError(f"OpenAI API error after {max_retries} attempts: {e}")
+                    raise OpenAIError(f"OpenAI API error after {max_retries} attempts: {e}")
                     
             except Exception as e:
-                raise AIError(f"Unexpected error calling OpenAI: {e}")
+                raise OpenAIError(f"Unexpected error calling OpenAI: {e}")
         
-        raise AIError(f"Failed to generate response after {max_retries} attempts")
+        raise OpenAIError(f"Failed to generate response after {max_retries} attempts")
+
+    def generate_from_prompt(
+        self,
+        system_prompt: str,
+        user_message: str,
+        max_retries: int = 3
+    ) -> str:
+        """Convenience method to send prebuilt prompts/messages."""
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message},
+        ]
+        return self.generate_response(messages, max_retries=max_retries)
     
     def extract_information(
         self, 
@@ -183,25 +196,27 @@ class OpenAIClient:
     def _build_dynamic_system_prompt(self, context: Dict[str, Any]) -> str:
         """Build dynamic system prompt based on context"""
         
-        # Base coach personality
-        base_prompt = """You are an AI fitness coach with expertise from world-class trainers including Dylan Werner, Ido Portal, Tom Merrick, and others. Provide personalized, encouraging, and PRACTICAL advice."""
+        # Use the unified prompt engine instead of duplicating logic
+        from infrastructure.external.prompt_engine import PromptEngine
         
-        # Add mentor-specific guidance
+        user_profile = context.get('user_profile', {})
+        recent_sessions = context.get('recent_sessions', [])
+        
+        # Create prompt engine instance
+        prompt_engine = PromptEngine(profile=user_profile, logs=recent_sessions)
+        
+        # Build simplified system prompt
+        base_prompt = """You are Yoel's personal fitness coach. You know him well and care about his progress. Talk to him naturally like a real coach would - encouraging, practical, and genuinely helpful."""
+        
+        # Add mentor context if available
         mentor_context = context.get('mentor_context', '')
         if mentor_context:
             base_prompt += f"""
             
-            MENTOR KNOWLEDGE CONTEXT:
+            MENTOR KNOWLEDGE:
             {mentor_context}
             
-            CRITICAL: Use this mentor knowledge to provide specific, expert-level guidance. 
-            - Reference specific mentors by name (Dylan Werner, Ido Portal, Tom Merrick, etc.)
-            - Include their specific principles, methodologies, and cues
-            - Provide detailed exercise progressions and regressions
-            - Use their specific terminology and approaches
-            - Don't give generic advice - use the mentor expertise
-            - Include specific cues, progressions, and technical details from the mentors
-            """
+            Use this mentor knowledge naturally in conversation - reference mentors by name when relevant."""
         
         # Add conversation intent guidance
         conversation_context = context.get('conversation_context', {})
@@ -277,23 +292,64 @@ class OpenAIClient:
             - If user asks "What are my goals?" or similar, list their actual saved goals
             """
         
-        # Add response guidelines
-        base_prompt += """
+        # Get advanced personality context
+        user_id = context.get('user_id', 'yoel_user')
+        emotional_context = self._detect_emotional_context(context)
         
-        RESPONSE GUIDELINES:
-        • Be VERY SPECIFIC and ACTIONABLE
-        • Give exact exercises, sets, reps, and weights when applicable
-        • Provide specific form cues and technique details
-        • Include exact durations and rest periods
-        • Use short paragraphs (2-3 sentences max)
-        • Use bullet points for specific exercises and sets
-        • Use emojis sparingly but effectively
-        • Keep it conversational and encouraging
-        • Reference mentor principles when relevant
-        • Connect to their personal context and goals
+        personality_context = personality_engine.get_personality_context(
+            user_id=user_id,
+            emotional_context=emotional_context
+        )
+        
+        # Add enhanced personality instructions
+        base_prompt += f"""
+        
+        ADVANCED PERSONALITY INSTRUCTIONS:
+        {personality_context.get('personality_instructions', '')}
+        
+        EMOTIONAL INTELLIGENCE:
+        Current emotional context: {emotional_context or 'neutral'}
+        Response approach: {personality_context.get('emotional_intelligence', {}).get(emotional_context, 'Be natural and supportive')}
+        
+        CONVERSATION PATTERNS:
+        {self._format_conversation_patterns(personality_context.get('conversation_patterns', {}))}
         """
         
         return base_prompt
+    
+    def _detect_emotional_context(self, context: Dict[str, Any]) -> Optional[str]:
+        """Detect emotional context from user message and conversation history"""
+        user_message = context.get('user_message', '')
+        if not user_message:
+            return None
+        
+        message_lower = user_message.lower()
+        
+        # Detect emotional indicators
+        if any(word in message_lower for word in ['excited', 'amazing', 'awesome', 'great']):
+            return 'excitement'
+        elif any(word in message_lower for word in ['pain', 'hurt', 'concerned', 'worried']):
+            return 'concern'
+        elif any(word in message_lower for word in ['tired', 'unmotivated', 'struggle']):
+            return 'support'
+        elif any(word in message_lower for word in ['achieved', 'progress', 'better']):
+            return 'celebration'
+        elif any(word in message_lower for word in ['curious', 'wondering', 'why', 'how']):
+            return 'curiosity'
+        else:
+            return None
+    
+    def _format_conversation_patterns(self, patterns: Dict[str, List[str]]) -> str:
+        """Format conversation patterns for inclusion in prompt"""
+        if not patterns:
+            return "Use natural, conversational language"
+        
+        formatted = []
+        for pattern_type, examples in patterns.items():
+            if examples:
+                formatted.append(f"{pattern_type.title()}: {examples[0]}")
+        
+        return "\n".join(formatted)
     
     def _build_user_message(self, user_input: str, context: Dict[str, Any]) -> str:
         """Build user message with layered context"""

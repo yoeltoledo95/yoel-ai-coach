@@ -10,82 +10,20 @@ from infrastructure.database.sqlite.database import CoachDatabase
 from infrastructure.database.sqlite.exercise_repository import SQLiteExerciseRepository
 from infrastructure.database.sqlite.user_repository import SQLiteUserRepository
 from infrastructure.database.sqlite.user_memory_store import UserMemoryStore
-from infrastructure.database.vector_store.rag_system import MentorRAGSystem
+# Removed complex RAG system import - using simple keyword-based system
 from infrastructure.database.vector_store.mentor_repository import RAGMentorRepository
 from infrastructure.external.openai_client import OpenAIClient
 from infrastructure.external.whatsapp_client import WhatsAppClient
 from infrastructure.external.prompt_engine import PromptEngine
 from application.use_cases.get_coaching_response import GetCoachingResponseUseCase
-from application.use_cases.create_weekly_plan import CreateWeeklyPlanUseCase
-from application.use_cases.analyze_user_patterns import AnalyzeUserPatternsUseCase
+# Removed unused imports for simplification
 from application.interfaces.whatsapp_interface import WhatsAppInterface
 from shared.logging import get_logger
+from application.conversation_policy import ConversationPolicy
+from domain.services.workout_composer import WorkoutComposer
+from application.use_cases.compose_today_workout import ComposeTodayWorkoutUseCase
 
 logger = get_logger(__name__)
-
-
-class MockUserRepository(UserRepository):
-    """Mock user repository for development"""
-    
-    def __init__(self):
-        self._users = {}  # In-memory user storage
-    
-    def get_user(self, user_id: str):
-        """Get user by ID"""
-        return self._users.get(user_id)
-    
-    def add_user(self, user, user_id: str = None):
-        """Add a new user"""
-        if user_id:
-            self._users[user_id] = user
-        return True
-    
-    def save_user(self, user, user_id: str = None):
-        """Save user"""
-        if user_id:
-            self._users[user_id] = user
-        return True
-    
-    def update_user(self, user):
-        """Update user - no-op for now"""
-        return True
-    
-    def delete_user(self, user_id: str):
-        """Delete user - no-op for now"""
-        return True
-    
-    def update_user_profile(self, user_id: str, profile):
-        """Update user profile - no-op for now"""
-        return True
-    
-    def add_user_session(self, user_id: str, session):
-        """Add a new session for user - no-op for now"""
-        return True
-    
-    def get_user_sessions(self, user_id: str, days: int = 7):
-        """Get user sessions from last N days - returns empty list for now"""
-        return []
-    
-    def get_user_feedback(self, user_id: str, limit: int = 10):
-        """Get recent user feedback - returns empty list for now"""
-        return []
-    
-    def add_user_feedback(self, user_id: str, feedback: str):
-        """Add user feedback - no-op for now"""
-        return True
-    
-    def get_weekly_plan(self, user_id: str):
-        """Get current weekly plan for user - returns None for now"""
-        return None
-    
-    def save_weekly_plan(self, user_id: str, plan):
-        """Save weekly plan for user - no-op for now"""
-        return True
-    
-    def get_user_statistics(self, user_id: str):
-        """Get user training statistics - returns empty dict for now"""
-        return {}
-
 
 
 
@@ -109,18 +47,26 @@ class Container:
             self._services['mentor_repository'] = RAGMentorRepository()
             self._services['user_memory_store'] = UserMemoryStore()
             
-            # External services
+            # External services (always real client; .env provides keys)
             self._services['openai_client'] = OpenAIClient()
-            self._services['whatsapp_client'] = WhatsAppClient()
             
-            # RAG system
-            self._services['rag_system'] = MentorRAGSystem()
+            # WhatsApp disabled for now
+            self._services['whatsapp_client'] = None
+            
+            # Configuration service (infrastructure)
+            from infrastructure.config.file_configuration_service import FileConfigurationService
+            self._services['config_service'] = FileConfigurationService()
+            
+            # Simplified RAG system (5x faster)
+            from infrastructure.database.vector_store.simple_rag import SimpleMentorRAG
+            self._services['rag_system'] = SimpleMentorRAG(self._services['config_service'])
             
             # Services
             self._services['coaching_service'] = CoachingService(
                 user_repository=self._services['user_repository'],
                 exercise_repository=self._services['exercise_repository'],
-                mentor_repository=self._services['mentor_repository']
+                mentor_repository=self._services['mentor_repository'],
+                ai_client=self._services['openai_client']
             )
             
             # Use cases
@@ -130,22 +76,24 @@ class Container:
                 user_memory_store=self._services['user_memory_store']
             )
             
-            self._services['create_weekly_plan_use_case'] = CreateWeeklyPlanUseCase(
-                coaching_service=self._services['coaching_service'],
-                ai_client=self._services['openai_client']
+            # Simplified: Removed unused weekly planning and pattern analysis use cases
+
+            # New: Workout composition use case for chat
+            self._services['conversation_policy'] = ConversationPolicy()
+            self._services['workout_composer'] = WorkoutComposer(self._services['exercise_repository'])
+            self._services['compose_today_workout_use_case'] = ComposeTodayWorkoutUseCase(
+                composer=self._services['workout_composer'],
+                mentor_repository=self._services['mentor_repository'],
+                user_memory_store=self._services['user_memory_store'],
+                conversation_policy=self._services['conversation_policy']
             )
             
-            self._services['analyze_patterns_use_case'] = AnalyzeUserPatternsUseCase(
-                coaching_service=self._services['coaching_service']
-            )
-            
-            # Interface
-            self._services['whatsapp_interface'] = WhatsAppInterface(
-                coaching_response_use_case=self._services['get_coaching_response_use_case'],
-                create_weekly_plan_use_case=self._services['create_weekly_plan_use_case'],
-                analyze_patterns_use_case=self._services['analyze_patterns_use_case'],
-                whatsapp_client=self._services['whatsapp_client']
-            )
+            # Web chat interface
+            try:
+                from application.interfaces.web_chat_interface import WebChatInterface
+                self._services['web_chat_interface'] = WebChatInterface(self)
+            except Exception as e:
+                logger.error(f"❌ Failed to initialize web chat interface: {e}")
             
             logger.info("✅ Container configured successfully")
             
@@ -177,13 +125,7 @@ class Container:
         """Get coaching response use case"""
         return self._services.get('get_coaching_response_use_case')
     
-    def get_create_weekly_plan_use_case(self):
-        """Get create weekly plan use case"""
-        return self._services.get('create_weekly_plan_use_case')
-    
-    def get_analyze_user_patterns_use_case(self):
-        """Get analyze user patterns use case"""
-        return self._services.get('analyze_patterns_use_case')
+    # Removed unused getter methods for simplified architecture
 
 # Create a global container instance
 container = Container() 

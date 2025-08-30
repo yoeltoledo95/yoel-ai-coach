@@ -481,25 +481,31 @@ class PromptEngine:
         # 5. Build instruction based on prompt type
         if prompt_type == "daily_workout":
             instruction = (
-                "You are Yoel's personal AI fitness coach. Using the context above, build a highly detailed, mentor-referenced workout for today. "
-                "For each phase (warm-up, activation, main, flexibility, cooldown), list every exercise, sets, reps, cues, and progressions/regressions. "
-                "Attribute each exercise to a mentor and explain why it's included and sequenced that way. End with a reflection prompt for Yoel."
+                "Have a natural conversation with Yoel about his workout today. Be conversational, helpful, and human-like. "
+                "Ask questions if you need clarity. Give practical advice. Reference his specific goals and mentors when relevant. "
+                "Keep it simple and natural - like talking to a real coach who knows him well."
             )
         elif prompt_type == "check_in":
             instruction = (
-                "You are Yoel's AI coach. Using the context above, ask Yoel a smart, open-ended check-in question about his recovery, mood, or readiness."
+                "Have a natural check-in conversation with Yoel. Ask how he's feeling, what he needs help with. Be human and caring."
             )
         elif prompt_type == "reflection":
             instruction = (
-                "You are Yoel's AI coach. Using the context above, prompt Yoel to reflect on his training, progress, and learning."
+                "Have a thoughtful conversation with Yoel about his training and progress. Be encouraging and insightful."
             )
         else:
             instruction = (
-                "You are Yoel's AI coach. Using the context above, answer the user's request in detail, referencing mentors and exercises as appropriate."
+                "Have a natural conversation with Yoel. Be helpful, human, and conversational. Use his context to give relevant advice."
             )
 
         # 6. Build final prompt (merged context as single user message per feedback)
-        system_prompt = "You are an AI fitness coach with expertise from world-class movement and strength mentors."
+        system_prompt = (
+            "You are Yoel's personal fitness coach. You know him well - his goals, his body, his preferences. "
+            "Talk to him like a real coach would: natural, encouraging, asking good questions. "
+            "You're not a robot generating templates - you're a human coach who cares about his progress. "
+            "Be conversational, practical, and genuine. Reference his mentors and goals when it makes sense, "
+            "but keep the conversation flowing naturally."
+        )
         user_message = "\n\n".join([part for part in context_parts if part.strip()]) + "\n\nINSTRUCTION:\n" + instruction
         
         return {

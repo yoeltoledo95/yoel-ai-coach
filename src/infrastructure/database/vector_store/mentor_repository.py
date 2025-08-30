@@ -2,9 +2,10 @@
 Real mentor repository implementation using RAG system
 """
 from typing import List, Optional, Dict, Any
+import time
 from domain.repositories.mentor_repository import MentorRepository
 from domain.entities.mentor import Mentor, MentorSpecialization
-from .rag_system import MentorRAGSystem
+from .simple_rag import SimpleMentorRAG
 import logging
 
 logger = logging.getLogger(__name__)
@@ -13,7 +14,11 @@ class RAGMentorRepository(MentorRepository):
     """Real mentor repository implementation using RAG system"""
     
     def __init__(self):
-        self.rag_system = MentorRAGSystem()
+        # Simple RAG system - no lazy init needed, instant startup
+        self.rag_system = SimpleMentorRAG()
+        # Removed complex caching - simple system is fast enough
+
+    # Removed unused caching methods - simple RAG is fast enough
     
     def get_mentor(self, mentor_id: str) -> Optional[Mentor]:
         """Get mentor by ID"""
@@ -46,11 +51,10 @@ class RAGMentorRepository(MentorRepository):
         return []
     
     def get_mentor_context(self, query: str, mentor_names: Optional[List[str]] = None) -> str:
-        """Get mentor context for a query using RAG system"""
+        """Get mentor context for a query using simplified RAG system"""
         try:
-            # Use the RAG system to get relevant mentor knowledge
+            # Direct call to simple RAG - no caching needed (system is <0.1s)
             mentor_context = self.rag_system.get_mentor_context(query, mentor_names)
-            logger.info(f"Retrieved mentor context for query: {query[:100]}...")
             return mentor_context
         except Exception as e:
             logger.error(f"Error getting mentor context: {e}")
@@ -59,6 +63,7 @@ class RAGMentorRepository(MentorRepository):
     def get_weekly_planning_context(self) -> str:
         """Get context for weekly planning"""
         try:
+            self._ensure_rag()
             # Use the RAG system to get weekly planning context
             planning_context = self.rag_system.get_weekly_planning_context()
             logger.info("Retrieved weekly planning context")
@@ -70,6 +75,7 @@ class RAGMentorRepository(MentorRepository):
     def get_mentor_statistics(self) -> Dict[str, Any]:
         """Get mentor knowledge base statistics"""
         try:
+            self._ensure_rag()
             # Use the RAG system to get statistics
             stats = self.rag_system.get_mentor_statistics()
             logger.info("Retrieved mentor statistics")

@@ -10,22 +10,26 @@ from infrastructure.config.settings import config
 def setup_logging() -> None:
     """Setup application logging"""
     # Create logs directory
-    config.logs_path.mkdir(exist_ok=True)
+    logs_path = getattr(config, 'logs_path', Path('logs'))
+    logs_path.mkdir(exist_ok=True)
     
     # Configure logging format
     log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     date_format = "%Y-%m-%d %H:%M:%S"
     
+    # Get debug mode safely
+    debug_mode = getattr(config, 'debug', False)
+    
     # Configure root logger
     logging.basicConfig(
-        level=logging.DEBUG if config.debug else logging.INFO,
+        level=logging.DEBUG if debug_mode else logging.INFO,
         format=log_format,
         datefmt=date_format,
         handlers=[
             # Console handler
             logging.StreamHandler(sys.stdout),
             # File handler
-            logging.FileHandler(config.logs_path / "app.log")
+            logging.FileHandler(logs_path / "app.log")
         ]
     )
     
@@ -37,8 +41,8 @@ def setup_logging() -> None:
     # Log application startup
     logger = logging.getLogger(__name__)
     logger.info("Application logging configured")
-    logger.info(f"Environment: {config.environment}")
-    logger.info(f"Debug mode: {config.debug}")
+    logger.info(f"Environment: {getattr(config, 'environment', 'development')}")
+    logger.info(f"Debug mode: {getattr(config, 'debug', False)}")
 
 
 def get_logger(name: str) -> logging.Logger:

@@ -4,7 +4,8 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime
 import os
 
-DATABASE_PATH = "coach_data.db"
+from ...config.settings import config
+DATABASE_PATH = config.database.sqlite_path if hasattr(config, 'database') else "coach_data.db"
 
 class CoachDatabase:
     def __init__(self, db_path: str = DATABASE_PATH):

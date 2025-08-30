@@ -24,6 +24,7 @@ class UserGoal(Enum):
     MOVEMENT_QUALITY = "movement_quality"
     JOINT_HEALTH = "joint_health"
     LONGEVITY = "longevity"
+    SKILL = "skill"  # Generic skill development goal
     # New goal types
     BALANCE = "balance"
     RECOVERY = "recovery"

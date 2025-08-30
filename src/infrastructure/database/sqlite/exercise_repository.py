@@ -8,9 +8,7 @@ from pathlib import Path
 import sys
 import os
 
-# Add src to path for imports
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
-
+# Use proper imports - no sys.path manipulation needed
 from domain.entities.exercise import Exercise, ExerciseCategory, ExerciseDifficulty, ExerciseVariation
 from domain.repositories.exercise_repository import ExerciseRepository
 

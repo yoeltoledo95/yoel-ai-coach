@@ -4,7 +4,7 @@ WhatsApp client with proper error handling
 import logging
 import requests
 from typing import Dict, Any, Optional
-from shared.exceptions import WhatsAppError, ConfigurationError
+from shared.exceptions import ExternalServiceError, ConfigurationError
 from infrastructure.config.settings import config
 
 logger = logging.getLogger(__name__)

@@ -166,8 +166,16 @@ class SQLiteUserRepository(UserRepository):
             
             profile = user.profile
             
-            # Convert goals to JSON array of strings
-            goals_json = json.dumps([goal.value for goal in profile.goals])
+            # Convert goals to JSON array of strings (handle both enum and string cases)
+            goals_list = []
+            for goal in profile.goals:
+                if hasattr(goal, 'value'):
+                    # It's an enum
+                    goals_list.append(goal.value)
+                else:
+                    # It's already a string
+                    goals_list.append(str(goal))
+            goals_json = json.dumps(goals_list)
             
             # Convert other fields to JSON
             training_prefs_json = json.dumps(profile.training_preferences)
@@ -184,7 +192,8 @@ class SQLiteUserRepository(UserRepository):
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
                 """, (
                     user_id, profile.name, profile.age, goals_json, 
-                    profile.level.value, training_prefs_json, injury_history_json,
+                    profile.level.value if hasattr(profile.level, 'value') else str(profile.level), 
+                    training_prefs_json, injury_history_json,
                     nutrition_prefs_json, recovery_needs_json
                 ))
                 conn.commit()
