@@ -1,242 +1,58 @@
-# 🏗️ AI Coach - Clean Architecture
+# AI Fitness Coach - Phase 1 Foundation
 
-A sophisticated AI-powered fitness coaching system built with **Clean Architecture** principles, featuring WhatsApp integration and comprehensive exercise knowledge management.
+## Overview
+Personal AI fitness coaching system built with Next.js 14, TypeScript, and Tom Merrick's flexibility expertise.
 
-## 🎯 **Architecture Overview**
+## Current Status
+✅ **Phase 1 Foundation Complete**
+- Next.js 14 project with TypeScript
+- Tom Merrick knowledge base converted to TypeScript
+- Workout generation engine implemented
+- Basic UI for workout generation
 
-This application follows **Clean Architecture** with **Domain-Driven Design** principles:
+## Architecture
+- **Frontend**: Next.js 14 with App Router, TypeScript, Tailwind CSS
+- **Data**: TypeScript interfaces for mentor knowledge and routines
+- **Engine**: Local workout generation using mentor expertise
+- **API**: Next.js API routes for workout generation
 
-```
-src/
-├── domain/           # Business logic & entities
-│   ├── entities/     # Core business objects
-│   ├── repositories/ # Data access interfaces
-│   └── services/     # Business logic services
-├── infrastructure/   # External concerns
-│   ├── database/     # Data persistence
-│   ├── external/     # External APIs
-│   └── config/       # Configuration
-├── application/      # Use cases & orchestration
-│   ├── use_cases/    # Application use cases
-│   └── interfaces/   # Interface adapters
-└── shared/          # Shared utilities
-```
+## Key Files
+- `app/page.tsx` - Main landing page
+- `app/workout/page.tsx` - Workout generator interface
+- `app/api/workout/route.ts` - Workout generation API endpoint
+- `lib/workout-engine.ts` - Core workout generation logic
+- `lib/data/tom-merrick.ts` - Tom Merrick's knowledge base and routines
 
-## 🚀 **Key Features**
+## Available Features
+1. **Workout Generation**: Generate workouts based on natural language requests
+2. **Mentor Knowledge**: Tom Merrick's flexibility routines and philosophy
+3. **Smart Adaptation**: Automatic routine modification based on time/energy constraints
+4. **Coaching Messages**: Contextual coaching advice for each workout
 
-### **Core Capabilities**
-- ✅ **75+ Exercises** from multiple sources (StrengthLog, DIE RINGE, White Coat Trainer)
-- ✅ **15 World-Class Mentors** with specialized knowledge
-- ✅ **RAG System** for intelligent knowledge retrieval
-- ✅ **WhatsApp Integration** for mobile coaching
-- ✅ **Personalized Coaching** based on user patterns
-- ✅ **Weekly Planning** with AI-generated programs
+## Example Requests
+- "I want to work on pancake flexibility"
+- "Give me a quick 15 minute morning routine" 
+- "I need some hip mobility work"
+- "Something gentle, I'm tired today"
 
-### **Technical Excellence**
-- 🏗️ **Clean Architecture** with clear separation of concerns
-- 🔄 **Dependency Injection** for loose coupling
-- 🛡️ **Comprehensive Error Handling** with custom exceptions
-- 📊 **Centralized Logging** and monitoring
-- ⚙️ **Configuration Management** with environment variables
-- 🧪 **Testable Design** with repository pattern
-
-## 📁 **Project Structure**
-
-```
-yoel_ai_coach/
-├── src/                          # Application source code
-│   ├── domain/                   # Business logic & entities
-│   │   ├── entities/            # Core business objects
-│   │   │   ├── user.py
-│   │   │   ├── exercise.py
-│   │   │   └── mentor.py
-│   │   ├── repositories/        # Data access interfaces
-│   │   │   ├── user_repository.py
-│   │   │   ├── exercise_repository.py
-│   │   │   └── mentor_repository.py
-│   │   └── services/           # Business logic services
-│   │       └── coaching_service.py
-│   ├── infrastructure/          # External concerns
-│   │   ├── database/           # Data persistence
-│   │   ├── external/           # External APIs
-│   │   │   ├── openai_client.py
-│   │   │   └── whatsapp_client.py
-│   │   └── config/             # Configuration
-│   │       └── settings.py
-│   ├── application/            # Use cases & orchestration
-│   │   ├── use_cases/         # Application use cases
-│   │   │   ├── get_coaching_response.py
-│   │   │   ├── create_weekly_plan.py
-│   │   │   └── analyze_user_patterns.py
-│   │   ├── interfaces/        # Interface adapters
-│   │   │   └── whatsapp_interface.py
-│   │   └── container.py       # Dependency injection
-│   └── shared/                # Shared utilities
-│       ├── exceptions.py
-│       └── logging.py
-├── data/                       # Data files
-│   ├── exercises/
-│   ├── mentors/
-│   └── users/
-├── tests/                      # Test suite
-├── scripts/                    # Utility scripts
-├── docs/                       # Documentation
-├── config/                     # Configuration files
-└── deployment/                 # Deployment configs
-```
-
-## 🛠️ **Installation & Setup**
-
-### **Prerequisites**
-- Python 3.8+
-- OpenAI API key
-- WhatsApp Business API credentials
-
-### **Environment Variables**
-
-Create a `.env` file in the root directory with the following variables:
+## Development
+Since we have npm permission issues, the dependencies aren't installed yet. To run locally:
 
 ```bash
-# OpenAI
-OPENAI_API_KEY=your_openai_api_key_here
-
-# WhatsApp Cloud API
-WHATSAPP_API_TOKEN=your_whatsapp_api_token_here
-WHATSAPP_PHONE_NUMBER_ID=your_phone_number_id_here
-WHATSAPP_VERIFY_TOKEN=your_webhook_verify_token_here
-
-# Optional
-ENVIRONMENT=development
-DEBUG=true
+# Fix npm permissions first, then:
+npm install
+npm run dev
 ```
 
-### **Installation**
-```bash
-# Clone repository
-git clone https://github.com/yoeltoledo95/yoel-ai-coach.git
-cd yoel_ai_coach
+The app will be available at `http://localhost:3000`
 
-# Install dependencies
-pip install -r requirements.txt
+## Next Steps (Future Phases)
+- Phase 2: User profiles and progress tracking (Supabase integration)
+- Phase 3: AI learning and adaptation (OpenAI integration) 
+- Phase 4: Full coach experience with planning and analysis
 
-# Run the application
-python src/main.py
-```
-
-## 🏃‍♂️ **Usage**
-
-### **WhatsApp Integration**
-The system automatically handles WhatsApp messages through webhooks:
-
-1. **Setup Webhook** in Meta Developer Console
-2. **Configure URL** to point to your server
-3. **Send Messages** to your WhatsApp number
-
-### **Message Types**
-- **General Coaching**: "I'm feeling tired today"
-- **Weekly Plans**: "Create my weekly plan"
-- **Progress Analysis**: "Show my progress"
-
-## 🧪 **Testing**
-
-```bash
-# Run all tests
-python -m pytest tests/
-
-# Run specific test categories
-python -m pytest tests/unit/
-python -m pytest tests/integration/
-python -m pytest tests/e2e/
-```
-
-## 📊 **Architecture Benefits**
-
-### **✅ Maintainability**
-- Clear separation of concerns
-- Single responsibility principle
-- Easy to understand and modify
-
-### **✅ Testability**
-- Dependency injection
-- Repository pattern
-- Mockable interfaces
-
-### **✅ Scalability**
-- Modular design
-- Loose coupling
-- Easy to extend
-
-### **✅ Reliability**
-- Comprehensive error handling
-- Retry logic for external APIs
-- Centralized logging
-
-## 🔄 **Development Workflow**
-
-### **Adding New Features**
-1. **Domain Layer**: Define entities and business rules
-2. **Repository Layer**: Define data access interfaces
-3. **Infrastructure Layer**: Implement data access
-4. **Application Layer**: Create use cases
-5. **Interface Layer**: Add user interfaces
-
-### **Example: Adding Exercise Categories**
-```python
-# 1. Domain Entity
-@dataclass
-class ExerciseCategory:
-    name: str
-    description: str
-    exercises: List[Exercise]
-
-# 2. Repository Interface
-class ExerciseCategoryRepository(ABC):
-    @abstractmethod
-    def get_categories(self) -> List[ExerciseCategory]:
-        pass
-
-# 3. Use Case
-class GetExerciseCategoriesUseCase:
-    def execute(self) -> List[ExerciseCategory]:
-        return self.repository.get_categories()
-```
-
-## 🚀 **Deployment**
-
-### **Local Development**
-```bash
-python src/main.py
-```
-
-### **Production**
-```bash
-# Using Docker
-docker build -t ai-coach .
-docker run -p 5000:5000 ai-coach
-
-# Using Python directly
-gunicorn -w 4 -b 0.0.0.0:5000 src.main:app
-```
-
-## 📈 **Performance & Monitoring**
-
-- **Logging**: Centralized logging with different levels
-- **Error Tracking**: Custom exceptions with detailed messages
-- **Health Checks**: `/health` endpoint for monitoring
-- **Metrics**: Training session analytics and user patterns
-
-## 🤝 **Contributing**
-
-1. **Fork** the repository
-2. **Create** a feature branch
-3. **Follow** the clean architecture principles
-4. **Add** comprehensive tests
-5. **Submit** a pull request
-
-## 📄 **License**
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
----
-
-**Built with ❤️ using Clean Architecture principles** 
+## Technology Stack
+- **Next.js 14** - Full-stack React framework
+- **TypeScript** - Type safety and better DX
+- **Tailwind CSS** - Utility-first styling
+- **No dependencies** - Local knowledge base, no external APIs needed for Phase 1
